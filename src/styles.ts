@@ -731,6 +731,8 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F6EFE7',
     overflow: 'hidden',
     marginBottom: 2,
+    borderWidth: 1,
+    borderColor: '#EFE4D8',
   },
   photoUploadPlaceholder: {
     minHeight: 188,
@@ -770,7 +772,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#FFF9F4',
+    backgroundColor: '#F6EFE7',
   },
   photoUploadAction: {
     fontFamily: 'MaruBuriSemiBold',

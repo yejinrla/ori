@@ -114,7 +114,21 @@ export default function ManualFormScreen() {
         <View style={styles.formCard}>
           <Pressable style={styles.photoUploadCard} onPress={pickPhoto}>
             {manualForm.photo ? (
-              <Image source={{ uri: manualForm.photo }} style={styles.photoUploadPreview} />
+              <>
+                <Image source={{ uri: manualForm.photo }} style={styles.photoUploadPreview} />
+                <View style={styles.photoUploadFooter}>
+                  <Text style={styles.photoUploadAction}>사진 변경</Text>
+                  <Pressable
+                    hitSlop={8}
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      setManualForm((current) => ({ ...current, photo: null }));
+                    }}
+                  >
+                    <Text style={styles.photoUploadRemove}>삭제</Text>
+                  </Pressable>
+                </View>
+              </>
             ) : (
               <View style={styles.photoUploadPlaceholder}>
                 <Text style={styles.photoUploadPlus}>+</Text>
@@ -124,22 +138,6 @@ export default function ManualFormScreen() {
                 </Text>
               </View>
             )}
-            <View style={styles.photoUploadFooter}>
-              <Text style={styles.photoUploadAction}>
-                {manualForm.photo ? '사진 변경' : '갤러리에서 선택'}
-              </Text>
-              {manualForm.photo ? (
-                <Pressable
-                  hitSlop={8}
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    setManualForm((current) => ({ ...current, photo: null }));
-                  }}
-                >
-                  <Text style={styles.photoUploadRemove}>삭제</Text>
-                </Pressable>
-              ) : null}
-            </View>
           </Pressable>
           <FormField label="제목">
             <TextInput
