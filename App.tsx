@@ -2,6 +2,7 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import {
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -36,6 +37,17 @@ type ViewState =
   | { name: 'link' }
   | { name: 'manual' }
   | { name: 'detail'; recipeId: string };
+
+const webInputReset =
+  Platform.OS === 'web'
+    ? ({
+        outlineStyle: 'solid',
+        outlineWidth: 0,
+        outlineColor: 'transparent',
+        borderWidth: 0,
+        boxShadow: 'none',
+      } as const)
+    : {};
 
 type ManualRecipeForm = {
   title: string;
@@ -1075,9 +1087,13 @@ const styles = StyleSheet.create({
   homeSearchInput: {
     fontFamily: 'MaruBuri',
     flex: 1,
+    minWidth: 0,
     fontSize: 15,
     color: '#36231B',
     padding: 0,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    ...webInputReset,
   },
   homeSearchPlaceholder: {
     fontFamily: 'MaruBuri',
@@ -1246,6 +1262,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: '#36231B',
+    borderWidth: 0,
+    ...webInputReset,
   },
   searchHintLabel: {
     fontFamily: 'MaruBuri',
@@ -1534,6 +1552,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 15,
     color: '#36231B',
+    borderWidth: 0,
+    ...webInputReset,
   },
   textArea: {
     minHeight: 96,
@@ -1615,6 +1635,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#36231B',
     paddingVertical: 4,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    ...webInputReset,
   },
   manualGridNameInput: {
     flex: 1,
