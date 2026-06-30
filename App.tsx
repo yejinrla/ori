@@ -33,6 +33,7 @@ type Recipe = {
 type ViewState =
   | { name: 'home' }
   | { name: 'search' }
+  | { name: 'recipes' }
   | { name: 'add' }
   | { name: 'link' }
   | { name: 'manual' }
@@ -167,6 +168,7 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [manualForm, setManualForm] = useState<ManualRecipeForm>(emptyManualForm);
+  const [recipeFilter, setRecipeFilter] = useState('전체');
 
   const filteredRecipes = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -393,6 +395,67 @@ export default function App() {
                 />
               ))}
             </>
+          )}
+        </ScrollView>
+      </View>
+    );
+  };
+
+  const renderRecipes = () => {
+    const categories = ['전체', ...Array.from(new Set(recipes.map((recipe) => recipe.category)))];
+    const visibleRecipes =
+      recipeFilter === '전체'
+        ? recipes
+        : recipes.filter((recipe) => recipe.category === recipeFilter);
+
+    return (
+      <View style={styles.recipesScreen}>
+        <View style={styles.recipesHeader}>
+          <Text style={styles.recipesTitle}>내 레시피</Text>
+          <Text style={styles.recipesCount}>{visibleRecipes.length}개의 레시피</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.recipeFilterScroll}
+          contentContainerStyle={styles.recipeFilterRow}
+        >
+          {categories.map((category) => {
+            const active = category === recipeFilter;
+            return (
+              <Pressable
+                key={category}
+                onPress={() => setRecipeFilter(category)}
+                style={[styles.recipeFilterChip, active && styles.recipeFilterChipActive]}
+              >
+                <Text
+                  style={[
+                    styles.recipeFilterText,
+                    active && styles.recipeFilterTextActive,
+                  ]}
+                >
+                  {category}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+        <ScrollView
+          style={styles.recipesListScroll}
+          contentContainerStyle={styles.recipesList}
+          showsVerticalScrollIndicator={false}
+        >
+          {visibleRecipes.length === 0 ? (
+            <Text style={styles.searchHint}>아직 저장한 레시피가 없어요.</Text>
+          ) : (
+            visibleRecipes.map((recipe) => (
+              <RecipeListCard
+                key={recipe.id}
+                recipe={recipe}
+                onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+                onFavorite={() => toggleFavorite(recipe.id)}
+              />
+            ))
           )}
         </ScrollView>
       </View>
@@ -662,6 +725,7 @@ export default function App() {
         <View style={styles.mainArea}>
           {view.name === 'home' && renderHome()}
           {view.name === 'search' && renderSearch()}
+          {view.name === 'recipes' && renderRecipes()}
           {view.name === 'add' && renderAdd()}
           {view.name === 'link' && renderLinkImporter()}
           {view.name === 'manual' && renderManualForm()}
@@ -679,8 +743,8 @@ export default function App() {
             icon="▤"
             activeIcon="▣"
             label="레시피"
-            active={view.name === 'detail'}
-            onPress={() => setView({ name: 'home' })}
+            active={view.name === 'recipes' || view.name === 'detail'}
+            onPress={() => setView({ name: 'recipes' })}
           />
           <Pressable style={styles.navCenter} onPress={() => setView({ name: 'add' })}>
             <View style={styles.navAddButton}>
@@ -1111,6 +1175,64 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 8,
+  },
+  recipesScreen: {
+    flex: 1,
+    paddingTop: 4,
+  },
+  recipesHeader: {
+    paddingHorizontal: 20,
+    marginBottom: 14,
+  },
+  recipesTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#1F1B18',
+  },
+  recipesCount: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    color: '#8C6D5E',
+    marginTop: 4,
+  },
+  recipeFilterScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  recipeFilterRow: {
+    paddingHorizontal: 20,
+    paddingRight: 28,
+    gap: 8,
+    paddingBottom: 16,
+  },
+  recipesListScroll: {
+    flex: 1,
+  },
+  recipeFilterChip: {
+    height: 36,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    backgroundColor: '#F3ECE2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recipeFilterChipActive: {
+    backgroundColor: '#36231B',
+  },
+  recipeFilterText: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#7B5C4E',
+  },
+  recipeFilterTextActive: {
+    color: '#FFF9F4',
+  },
+  recipesList: {
+    paddingHorizontal: 20,
+    paddingBottom: 150,
+    gap: 12,
   },
   searchClear: {
     fontSize: 14,
