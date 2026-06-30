@@ -463,8 +463,8 @@ export default function App() {
 
         <TagRow tags={selectedRecipe.tags} />
 
-        <DetailSection title="재료" items={selectedRecipe.ingredients} />
-        <DetailSection title="양념" items={selectedRecipe.seasonings} />
+        <DetailSection title="재료" items={selectedRecipe.ingredients} chips />
+        <DetailSection title="양념" items={selectedRecipe.seasonings} chips />
         <DetailSection title="조리 순서" items={selectedRecipe.steps} numbered />
 
         <View style={styles.panel}>
@@ -603,21 +603,48 @@ function DetailSection({
   title,
   items,
   numbered,
+  chips,
 }: {
   title: string;
   items: string[];
   numbered?: boolean;
+  chips?: boolean;
 }) {
   return (
     <View style={styles.panel}>
       <Text style={styles.label}>{title}</Text>
-      {items.map((item, index) => (
-        <Text key={`${title}-${index}`} style={styles.detailText}>
-          {numbered ? `${index + 1}. ${item}` : `• ${item}`}
-        </Text>
-      ))}
+      {chips ? (
+        <View style={styles.ingredientGrid}>
+          {items.map((item, index) => (
+            <View key={`${title}-${index}`} style={styles.ingredientRow}>
+              <Text style={styles.ingredientName}>{splitIngredientText(item).name}</Text>
+              <Text style={styles.ingredientAmount}>{splitIngredientText(item).amount}</Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        items.map((item, index) => (
+          <Text key={`${title}-${index}`} style={styles.detailText}>
+            {numbered ? `${index + 1}. ${item}` : `• ${item}`}
+          </Text>
+        ))
+      )}
     </View>
   );
+}
+
+function splitIngredientText(item: string) {
+  const normalized = item.trim();
+  const match = normalized.match(/^(.*?)(\s+\S+)$/);
+
+  if (!match) {
+    return { name: normalized, amount: '' };
+  }
+
+  return {
+    name: match[1].trim(),
+    amount: match[2].trim(),
+  };
 }
 
 function FormField({
@@ -1078,6 +1105,32 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     color: '#533F36',
+  },
+  ingredientGrid: {
+    borderTopWidth: 1,
+    borderTopColor: '#EFE3D7',
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFE3D7',
+  },
+  ingredientName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#36231B',
+  },
+  ingredientAmount: {
+    minWidth: 92,
+    marginLeft: 16,
+    textAlign: 'right',
+    color: '#6B4E41',
+    fontSize: 15,
+    fontWeight: '600',
   },
   bottomNav: {
     position: 'absolute',
