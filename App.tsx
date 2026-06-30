@@ -1,3 +1,4 @@
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import {
@@ -20,6 +21,8 @@ type Recipe = {
   steps: string[];
   memo: string;
   image: string;
+  cookTime?: string;
+  rating?: number;
   sourceUrl?: string;
   sourceType: 'manual' | 'youtube' | 'instagram' | 'blog';
   favorite: boolean;
@@ -28,6 +31,7 @@ type Recipe = {
 
 type ViewState =
   | { name: 'home' }
+  | { name: 'search' }
   | { name: 'add' }
   | { name: 'link' }
   | { name: 'manual' }
@@ -65,6 +69,8 @@ const initialRecipes: Recipe[] = [
     ],
     memo: '설탕은 조금 줄이고 청양고추를 추가하면 더 좋다.',
     image: '🥘',
+    cookTime: '20분',
+    rating: 4.7,
     sourceUrl: 'https://youtube.com/watch?v=sample-jeyuk',
     sourceType: 'youtube',
     favorite: true,
@@ -84,6 +90,8 @@ const initialRecipes: Recipe[] = [
     ],
     memo: '중간에 한 번 뒤집으면 더 고르게 익는다.',
     image: '🥔',
+    cookTime: '15분',
+    rating: 4.3,
     sourceUrl: 'https://blog.example.com/potato',
     sourceType: 'blog',
     favorite: false,
@@ -103,6 +111,8 @@ const initialRecipes: Recipe[] = [
     ],
     memo: '삶은 계란을 추가하면 포만감이 좋다.',
     image: '🥗',
+    cookTime: '10분',
+    rating: 4.8,
     sourceType: 'manual',
     favorite: true,
     addedAt: '2026.06.28',
@@ -136,6 +146,10 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    MaruBuri: require('./assets/MaruBuri-Regular.ttf'),
+    MaruBuriSemiBold: require('./assets/MaruBuri-SemiBold.ttf'),
+  });
   const [recipes, setRecipes] = useState(initialRecipes);
   const [view, setView] = useState<ViewState>({ name: 'home' });
   const [query, setQuery] = useState('');
@@ -165,6 +179,7 @@ export default function App() {
 
   const favoriteRecipes = recipes.filter((recipe) => recipe.favorite);
   const recentRecipes = [...recipes].slice(0, 3);
+  const recommendedRecipes = [...recipes].reverse();
   const selectedRecipe =
     view.name === 'detail'
       ? recipes.find((recipe) => recipe.id === view.recipeId)
@@ -278,49 +293,99 @@ export default function App() {
   };
 
   const renderHome = () => (
-    <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.searchCard}>
-        <Text style={styles.sectionTitle}>레시피 찾기</Text>
-        <TextInput
-          placeholder="음식, 재료, 태그로 검색"
-          placeholderTextColor="#8C7A70"
-          style={styles.searchInput}
-          value={query}
-          onChangeText={setQuery}
-        />
-        <Text style={styles.searchHintLabel}>이런 식으로 찾아보세요</Text>
-        <View style={styles.searchHintTags}>
-          <View style={styles.searchHintChip}>
-            <Text style={styles.searchHintChipText}>김치</Text>
-          </View>
-          <View style={styles.searchHintChip}>
-            <Text style={styles.searchHintChipText}>감자</Text>
-          </View>
-          <View style={styles.searchHintChip}>
-            <Text style={styles.searchHintChipText}>닭</Text>
-          </View>
-          <View style={styles.searchHintChip}>
-            <Text style={styles.searchHintChipText}>매운맛</Text>
-          </View>
-          <View style={styles.searchHintChip}>
-            <Text style={styles.searchHintChipText}>간단</Text>
-          </View>
-        </View>
+    <ScrollView contentContainerStyle={styles.homeContent}>
+      <View style={styles.homeIntro}>
+        <Text style={styles.homeIntroEyebrow}>👋 안녕하세요!</Text>
+        <Text style={styles.homeIntroTitle}>6월 30일 화요일,</Text>
+        <Text style={styles.homeIntroSubtitle}>오늘은 무엇을 만들어볼까요?</Text>
       </View>
-
-      <SectionHeader title="최근 추가한 레시피" />
-      <View style={styles.listColumn}>
-        {recentRecipes.map((recipe) => (
-          <RecipeListCard
+      <Pressable style={styles.homeSearchWrap} onPress={() => setView({ name: 'search' })}>
+        <SearchIcon />
+        <Text style={query ? styles.homeSearchValue : styles.homeSearchPlaceholder}>
+          {query || '재료나 음식 검색'}
+        </Text>
+      </Pressable>
+      <Text style={styles.homeRailTitle}>최근 저장한 레시피</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.featuredRail}
+      >
+        {recentRecipes.map((recipe, index) => (
+          <FeaturedCard
             key={recipe.id}
             recipe={recipe}
+            emoji={index === 0 ? '🍋' : index === 1 ? '🥩' : '🥗'}
             onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
-            onFavorite={() => toggleFavorite(recipe.id)}
           />
         ))}
-      </View>
+      </ScrollView>
+
+      <Text style={[styles.homeRailTitle, styles.homeRailTitleSpaced]}>오늘의 추천</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.featuredRail}
+      >
+        {recommendedRecipes.map((recipe) => (
+          <FeaturedCard
+            key={recipe.id}
+            recipe={recipe}
+            emoji={recipe.image}
+            onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+          />
+        ))}
+      </ScrollView>
     </ScrollView>
   );
+
+  const renderSearch = () => {
+    const trimmed = query.trim();
+
+    return (
+      <View style={styles.searchScreen}>
+        <View style={styles.homeSearchWrap}>
+          <SearchIcon />
+          <TextInput
+            autoFocus
+            placeholder="재료나 음식 검색"
+            placeholderTextColor="#AFACA6"
+            style={styles.homeSearchInput}
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+          />
+          {query.length > 0 ? (
+            <Pressable hitSlop={8} onPress={() => setQuery('')}>
+              <Text style={styles.searchClear}>✕</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        <ScrollView
+          contentContainerStyle={styles.searchResults}
+          keyboardShouldPersistTaps="handled"
+        >
+          {trimmed.length === 0 ? (
+            <Text style={styles.searchHint}>레시피 이름, 재료, 태그로 검색해보세요.</Text>
+          ) : filteredRecipes.length === 0 ? (
+            <Text style={styles.searchHint}>‘{trimmed}’에 대한 결과가 없어요.</Text>
+          ) : (
+            <>
+              <Text style={styles.searchCount}>{filteredRecipes.length}개의 레시피</Text>
+              {filteredRecipes.map((recipe) => (
+                <RecipeListCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+                  onFavorite={() => toggleFavorite(recipe.id)}
+                />
+              ))}
+            </>
+          )}
+        </ScrollView>
+      </View>
+    );
+  };
 
   const renderAdd = () => (
     <View style={styles.content}>
@@ -475,52 +540,90 @@ export default function App() {
       );
     }
 
+    const recipe = selectedRecipe;
+
     return (
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.detailHero}>
-          <Text style={styles.detailEmoji}>{selectedRecipe.image}</Text>
-          <View style={styles.detailHeroText}>
-            <View
-              style={[
-                styles.categoryBadge,
-                {
-                  backgroundColor:
-                    categoryColors[selectedRecipe.category] ?? categoryColors.default,
-                },
-              ]}
-            >
-              <Text style={styles.categoryBadgeText}>{selectedRecipe.category}</Text>
-            </View>
-            <Text style={styles.detailTitle}>{selectedRecipe.title}</Text>
-            <Text style={styles.detailMeta}>
-              {selectedRecipe.addedAt}
-              {selectedRecipe.sourceUrl ? ` · 원본 링크 저장됨` : ' · 직접 작성'}
+      <ScrollView contentContainerStyle={styles.detailContent}>
+        <Text style={styles.detailTitleTop}>{recipe.title}</Text>
+
+        <View style={styles.detailPhoto}>
+          <Text style={styles.detailPhotoEmoji}>{recipe.image}</Text>
+        </View>
+
+        <View style={styles.detailMetaList}>
+          {recipe.cookTime ? (
+            <Text style={styles.detailMetaLine}>
+              <Text style={styles.detailMetaLabel}>조리 시간: </Text>
+              {recipe.cookTime}
             </Text>
-          </View>
+          ) : null}
+          <Text style={styles.detailMetaLine}>
+            <Text style={styles.detailMetaLabel}>분류: </Text>
+            {recipe.category}
+          </Text>
+          {typeof recipe.rating === 'number' ? (
+            <Text style={styles.detailMetaLine}>
+              <Text style={styles.detailMetaLabel}>평점: </Text>
+              {`★ ${recipe.rating.toFixed(1)}`}
+            </Text>
+          ) : null}
+          <Text style={styles.detailMetaLine}>
+            <Text style={styles.detailMetaLabel}>저장일: </Text>
+            {recipe.addedAt}
+          </Text>
         </View>
 
-        <TagRow tags={selectedRecipe.tags} />
+        {recipe.tags.length ? <TagRow tags={recipe.tags} /> : null}
 
-        <DetailSection title="재료" items={selectedRecipe.ingredients} chips />
-        <DetailSection title="양념" items={selectedRecipe.seasonings} chips />
-        <DetailSection title="조리 순서" items={selectedRecipe.steps} numbered />
-
-        <View style={styles.panel}>
-          <Text style={styles.label}>메모</Text>
-          <Text style={styles.detailText}>{selectedRecipe.memo || '메모 없음'}</Text>
+        <Text style={styles.detailSectionHeading}>재료</Text>
+        <View style={styles.ingredientGrid}>
+          {recipe.ingredients.map((item, index) => {
+            const parsed = splitIngredientText(item);
+            return (
+              <View key={`ing-${index}`} style={styles.ingredientRow}>
+                <Text style={styles.ingredientName}>{parsed.name}</Text>
+                <Text style={styles.ingredientAmount}>{parsed.amount}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        <View style={styles.panel}>
-          <Text style={styles.label}>원본 링크</Text>
-          <Text style={styles.detailText}>{selectedRecipe.sourceUrl ?? '직접 작성 레시피'}</Text>
+        <Text style={styles.detailSectionHeading}>양념</Text>
+        <View style={styles.ingredientGrid}>
+          {recipe.seasonings.map((item, index) => {
+            const parsed = splitIngredientText(item);
+            return (
+              <View key={`sea-${index}`} style={styles.ingredientRow}>
+                <Text style={styles.ingredientName}>{parsed.name}</Text>
+                <Text style={styles.ingredientAmount}>{parsed.amount}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        <Pressable
-          style={styles.primaryButton}
-          onPress={() => toggleFavorite(selectedRecipe.id)}
-        >
-          <Text style={styles.primaryButtonText}>
-            {selectedRecipe.favorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+        <Text style={styles.detailSectionHeading}>조리 순서</Text>
+        <View style={styles.detailSteps}>
+          {recipe.steps.map((item, index) => (
+            <Text key={`step-${index}`} style={styles.detailStepText}>
+              <Text style={styles.detailStepNumber}>{`${index + 1}. `}</Text>
+              {item}
+            </Text>
+          ))}
+        </View>
+
+        <Text style={styles.detailSectionHeading}>메모</Text>
+        <Text style={styles.detailText}>{recipe.memo || '메모 없음'}</Text>
+
+        {recipe.sourceUrl ? (
+          <>
+            <Text style={styles.detailSectionHeading}>원본 링크</Text>
+            <Text style={styles.detailText}>{recipe.sourceUrl}</Text>
+          </>
+        ) : null}
+
+        <Pressable style={styles.detailFavoriteButton} onPress={() => toggleFavorite(recipe.id)}>
+          <Text style={styles.detailFavoriteText}>
+            {recipe.favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가'}
           </Text>
         </Pressable>
       </ScrollView>
@@ -532,16 +635,21 @@ export default function App() {
       <StatusBar style="dark" />
       <View style={styles.appShell}>
         <View style={styles.topBar}>
-          <Text style={styles.topBarTitle}>오늘의 요리</Text>
           {view.name !== 'home' ? (
-            <Pressable onPress={() => setView({ name: 'home' })}>
-              <Text style={styles.topBarAction}>Home</Text>
+            <Pressable
+              onPress={() => setView({ name: 'home' })}
+              style={styles.topBarBackWrap}
+              hitSlop={8}
+            >
+              <Text style={styles.topBarBack}>‹</Text>
             </Pressable>
           ) : null}
+          <Text style={[styles.topBarTitle, fontsLoaded && styles.topBarTitleLoaded]}>오늘의 요리</Text>
         </View>
 
         <View style={styles.mainArea}>
           {view.name === 'home' && renderHome()}
+          {view.name === 'search' && renderSearch()}
           {view.name === 'add' && renderAdd()}
           {view.name === 'link' && renderLinkImporter()}
           {view.name === 'manual' && renderManualForm()}
@@ -551,14 +659,36 @@ export default function App() {
         <View style={styles.bottomNav}>
           <NavItem
             icon="⌂"
-            label="CREATE"
-            active={view.name === 'add' || view.name === 'link' || view.name === 'manual'}
-            onPress={() => setView({ name: 'add' })}
+            label="홈"
+            active={view.name === 'home'}
+            onPress={() => setView({ name: 'home' })}
           />
-          <NavItem icon="▤" label="BLOGS" active={false} onPress={() => setView({ name: 'home' })} />
-          <NavItem icon="◌" label="WORKSHOPS" active={false} onPress={() => setView({ name: 'home' })} />
-          <NavItem icon="◔" label="RECIPES" active={view.name === 'detail'} onPress={() => setView({ name: 'home' })} />
-          <NavItem icon="⌕" label="SEARCH" active={view.name === 'home'} onPress={() => setView({ name: 'home' })} />
+          <NavItem
+            icon="▤"
+            activeIcon="▣"
+            label="레시피"
+            active={view.name === 'detail'}
+            onPress={() => setView({ name: 'home' })}
+          />
+          <Pressable style={styles.navCenter} onPress={() => setView({ name: 'add' })}>
+            <View style={styles.navAddButton}>
+              <Text style={styles.navAddIcon}>+</Text>
+            </View>
+          </Pressable>
+          <NavItem
+            icon="▦"
+            activeIcon="▣"
+            label="캘린더"
+            active={false}
+            onPress={() => setView({ name: 'home' })}
+          />
+          <NavItem
+            icon="◍"
+            activeIcon="◉"
+            label="마이페이지"
+            active={false}
+            onPress={() => setView({ name: 'home' })}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -756,20 +886,69 @@ function ManualGridEditor({
 
 function NavItem({
   icon,
+  activeIcon,
   label,
   active,
   onPress,
 }: {
   icon: string;
+  activeIcon?: string;
   label: string;
   active: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.navItem, active && styles.navItemActive]}>
-      <Text style={[styles.navIcon, active && styles.navIconActive]}>{icon}</Text>
+      <Text style={[styles.navIcon, active && styles.navIconActive]}>{active ? activeIcon ?? icon : icon}</Text>
       <Text style={[styles.navLabel, active && styles.navLabelActive]}>{label}</Text>
     </Pressable>
+  );
+}
+
+function FeaturedCard({
+  recipe,
+  emoji,
+  onPress,
+}: {
+  recipe: Recipe;
+  emoji: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable style={styles.featuredCard} onPress={onPress}>
+      <View style={styles.featuredBody}>
+        <Text style={styles.featuredTitle} numberOfLines={2}>
+          {recipe.title.replace(/ /g, '\n')}
+        </Text>
+        <Text style={styles.featuredMeta}>{recipe.category}</Text>
+        <View style={styles.featuredInfoRow}>
+          {recipe.cookTime ? (
+            <View style={styles.featuredInfoItem}>
+              <Text style={styles.featuredTimeIcon}>{'⏱︎'}</Text>
+              <Text style={styles.featuredInfo}>{recipe.cookTime}</Text>
+            </View>
+          ) : null}
+          {typeof recipe.rating === 'number' ? (
+            <View style={styles.featuredInfoItem}>
+              <Text style={styles.featuredStarIcon}>★</Text>
+              <Text style={styles.featuredInfo}>{recipe.rating.toFixed(1)}</Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
+      <View style={styles.featuredImageArea}>
+        <Text style={styles.featuredEmoji}>{emoji}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <View style={styles.searchIcon}>
+      <View style={styles.searchIconGlass} />
+      <View style={styles.searchIconHandle} />
+    </View>
   );
 }
 
@@ -808,28 +987,43 @@ function OptionIcon({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F6EFE7',
+    backgroundColor: '#FFFFFF',
   },
   appShell: {
     flex: 1,
   },
   topBar: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 14,
     paddingBottom: 18,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    minHeight: 64,
+    justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   topBarTitle: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 20,
+    fontWeight: '500',
     color: '#36231B',
+    letterSpacing: 2.4,
   },
-  topBarAction: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#A34C31',
+  topBarTitleLoaded: {
+    fontFamily: 'MaruBuri',
+    fontWeight: '400',
+  },
+  topBarBackWrap: {
+    position: 'absolute',
+    left: 16,
+    top: 14,
+    bottom: 18,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  topBarBack: {
+    fontSize: 40,
+    lineHeight: 42,
+    fontWeight: '400',
+    color: '#36231B',
   },
   mainArea: {
     flex: 1,
@@ -839,13 +1033,213 @@ const styles = StyleSheet.create({
     paddingBottom: 150,
     gap: 16,
   },
+  homeContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 150,
+  },
+  featuredRail: {
+    paddingRight: 28,
+    gap: 14,
+  },
+  homeRailTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F1B18',
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  homeRailTitleSpaced: {
+    marginTop: 28,
+  },
+  homeIntro: {
+    marginBottom: 18,
+    gap: 2,
+  },
+  homeSearchWrap: {
+    marginBottom: 18,
+    height: 58,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
+    paddingHorizontal: 18,
+    gap: 11,
+    shadowColor: '#000000',
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+  },
+  homeSearchInput: {
+    fontFamily: 'MaruBuri',
+    flex: 1,
+    fontSize: 15,
+    color: '#36231B',
+    padding: 0,
+  },
+  homeSearchPlaceholder: {
+    fontFamily: 'MaruBuri',
+    flex: 1,
+    fontSize: 15,
+    color: '#AFACA6',
+  },
+  homeSearchValue: {
+    fontFamily: 'MaruBuri',
+    flex: 1,
+    fontSize: 15,
+    color: '#36231B',
+  },
+  searchScreen: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  searchClear: {
+    fontSize: 14,
+    color: '#AFACA6',
+  },
+  searchResults: {
+    paddingBottom: 150,
+    gap: 12,
+  },
+  searchCount: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    color: '#8C6D5E',
+    marginBottom: 2,
+  },
+  searchHint: {
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    lineHeight: 21,
+    color: '#947B6E',
+    paddingTop: 24,
+    textAlign: 'center',
+  },
+  searchIcon: {
+    width: 17,
+    height: 17,
+  },
+  searchIconGlass: {
+    width: 13,
+    height: 13,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#BDBAB4',
+  },
+  searchIconHandle: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 7,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: '#BDBAB4',
+    transform: [{ rotate: '45deg' }],
+  },
+  homeIntroEyebrow: {
+    fontFamily: 'MaruBuri',
+    fontSize: 12,
+    color: '#9A948D',
+    marginBottom: 10,
+  },
+  homeIntroTitle: {
+    fontFamily: 'MaruBuri',
+    fontSize: 18,
+    lineHeight: 26,
+    fontWeight: '700',
+    color: '#1F1B18',
+  },
+  homeIntroSubtitle: {
+    fontFamily: 'MaruBuri',
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#1F1B18',
+  },
+  featuredCard: {
+    backgroundColor: '#F2F1ED',
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+    width: 168,
+  },
+  featuredEyebrow: {
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    lineHeight: 18,
+    color: '#4A4039',
+  },
+  featuredEmoji: {
+    fontSize: 98,
+    textAlign: 'center',
+    marginTop: 0,
+  },
+  featuredBody: {
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 12,
+    gap: 2,
+  },
+  featuredTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 18,
+    lineHeight: 24,
+    minHeight: 48,
+    fontWeight: '600',
+    color: '#1F1B18',
+  },
+  featuredMeta: {
+    fontFamily: 'MaruBuri',
+    color: '#8E857D',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  featuredInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 6,
+  },
+  featuredInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  featuredTimeIcon: {
+    fontSize: 12,
+    color: '#8B8B8B',
+  },
+  featuredStarIcon: {
+    fontSize: 12,
+    color: '#F6B73C',
+  },
+  featuredInfo: {
+    fontFamily: 'MaruBuri',
+    fontSize: 12,
+    color: '#6B5F56',
+  },
+  featuredImageArea: {
+    minHeight: 150,
+    backgroundColor: '#F2F1ED',
+    paddingHorizontal: 18,
+    paddingTop: 6,
+    paddingBottom: 18,
+    justifyContent: 'center',
+  },
   searchCard: {
-    backgroundColor: '#FCE8C8',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 18,
     gap: 8,
   },
   searchInput: {
+    fontFamily: 'MaruBuri',
     backgroundColor: '#FFF9F4',
     borderRadius: 16,
     paddingHorizontal: 16,
@@ -854,6 +1248,7 @@ const styles = StyleSheet.create({
     color: '#36231B',
   },
   searchHintLabel: {
+    fontFamily: 'MaruBuri',
     color: '#7C5D4F',
     fontSize: 13,
     fontWeight: '600',
@@ -870,6 +1265,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   searchHintChipText: {
+    fontFamily: 'MaruBuri',
     color: '#745748',
     fontSize: 12,
     fontWeight: '700',
@@ -881,11 +1277,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontFamily: 'MaruBuri',
+    fontSize: 18,
     fontWeight: '800',
     color: '#36231B',
   },
   sectionAction: {
+    fontFamily: 'MaruBuri',
     color: '#A34C31',
     fontSize: 14,
     fontWeight: '700',
@@ -906,11 +1304,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   previewTitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 16,
     fontWeight: '800',
     color: '#36231B',
   },
   previewSubtitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 13,
     color: '#8C6D5E',
   },
@@ -932,11 +1332,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   favoriteTitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 16,
     fontWeight: '700',
     color: '#36231B',
   },
   favoriteSubtitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 13,
     color: '#8C6D5E',
   },
@@ -961,11 +1363,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listCardTitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 18,
     fontWeight: '800',
     color: '#36231B',
   },
   listCardMeta: {
+    fontFamily: 'MaruBuri',
     fontSize: 13,
     color: '#8C6D5E',
   },
@@ -974,6 +1378,7 @@ const styles = StyleSheet.create({
     color: '#D85C43',
   },
   cardSnippet: {
+    fontFamily: 'MaruBuri',
     color: '#5F463B',
     fontSize: 14,
     lineHeight: 20,
@@ -990,19 +1395,22 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   tagText: {
+    fontFamily: 'MaruBuri',
     color: '#7B5544',
     fontSize: 12,
     fontWeight: '700',
   },
   screenTitle: {
-    fontSize: 28,
+    fontFamily: 'MaruBuri',
+    fontSize: 24,
     fontWeight: '800',
     color: '#36231B',
     marginBottom: 8,
   },
   screenDescription: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    lineHeight: 21,
     color: '#947B6E',
     marginBottom: 8,
   },
@@ -1084,36 +1492,42 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   optionTitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 18,
     fontWeight: '800',
     color: '#36231B',
   },
   optionDescription: {
+    fontFamily: 'MaruBuri',
     fontSize: 14,
     lineHeight: 20,
     color: '#71594D',
   },
   optionDescriptionOnDark: {
+    fontFamily: 'MaruBuri',
     fontSize: 15,
     lineHeight: 22,
     color: '#FFFFFF',
   },
   panel: {
-    backgroundColor: '#FFF9F4',
+    backgroundColor: '#FFFFFF',
     borderRadius: 22,
     padding: 18,
     gap: 10,
   },
   label: {
+    fontFamily: 'MaruBuri',
     fontSize: 15,
     fontWeight: '800',
     color: '#36231B',
   },
   helperText: {
+    fontFamily: 'MaruBuri',
     fontSize: 13,
     color: '#8C6D5E',
   },
   input: {
+    fontFamily: 'MaruBuri',
     backgroundColor: '#F6EFE7',
     borderRadius: 16,
     paddingHorizontal: 14,
@@ -1132,6 +1546,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButtonText: {
+    fontFamily: 'MaruBuri',
     color: '#FFF9F4',
     fontSize: 16,
     fontWeight: '800',
@@ -1143,16 +1558,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   aiPreviewTitle: {
+    fontFamily: 'MaruBuri',
     fontSize: 16,
     fontWeight: '800',
     color: '#36231B',
   },
   aiPreviewText: {
+    fontFamily: 'MaruBuri',
     fontSize: 14,
     color: '#654E43',
   },
   formCard: {
-    backgroundColor: '#FFF9F4',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 18,
     gap: 14,
@@ -1176,6 +1593,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   manualGridHeaderText: {
+    fontFamily: 'MaruBuri',
     flex: 1,
     fontSize: 12,
     fontWeight: '700',
@@ -1191,6 +1609,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E8DDD3',
   },
   manualGridInput: {
+    fontFamily: 'MaruBuri',
     minWidth: 0,
     flexShrink: 1,
     fontSize: 16,
@@ -1216,6 +1635,7 @@ const styles = StyleSheet.create({
     borderColor: '#E3D4C8',
   },
   manualGridAddText: {
+    fontFamily: 'MaruBuri',
     color: '#7B5C4E',
     fontSize: 13,
     fontWeight: '700',
@@ -1242,28 +1662,112 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   categoryBadgeText: {
+    fontFamily: 'MaruBuri',
     color: '#FFF9F4',
     fontSize: 12,
     fontWeight: '800',
   },
   detailTitle: {
-    fontSize: 26,
-    lineHeight: 32,
+    fontFamily: 'MaruBuri',
+    fontSize: 22,
+    lineHeight: 29,
     fontWeight: '800',
     color: '#36231B',
   },
   detailMeta: {
-    fontSize: 13,
+    fontFamily: 'MaruBuri',
+    fontSize: 12,
     color: '#8C6D5E',
   },
   detailText: {
-    fontSize: 15,
-    lineHeight: 24,
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    lineHeight: 22,
     color: '#533F36',
   },
+  detailContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 150,
+  },
+  detailTitleTop: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: '600',
+    color: '#1F1B18',
+    textAlign: 'center',
+    marginBottom: 18,
+  },
+  detailPhoto: {
+    width: '100%',
+    height: 280,
+    borderRadius: 20,
+    backgroundColor: '#F2F1ED',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  detailPhotoEmoji: {
+    fontSize: 150,
+  },
+  detailMetaList: {
+    gap: 6,
+    marginBottom: 4,
+  },
+  detailMetaLine: {
+    fontFamily: 'MaruBuri',
+    fontSize: 15,
+    lineHeight: 24,
+    color: '#4A4039',
+  },
+  detailMetaLabel: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontWeight: '700',
+    color: '#1F1B18',
+  },
+  detailSectionHeading: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F1B18',
+    marginTop: 26,
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E7DDD2',
+  },
+  detailSteps: {
+    gap: 12,
+  },
+  detailStepText: {
+    fontFamily: 'MaruBuri',
+    fontSize: 15,
+    lineHeight: 23,
+    color: '#3F2F27',
+  },
+  detailStepNumber: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontWeight: '700',
+    color: '#A34C31',
+  },
+  detailFavoriteButton: {
+    marginTop: 28,
+    borderWidth: 1.5,
+    borderColor: '#D85C43',
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  detailFavoriteText: {
+    fontFamily: 'MaruBuriSemiBold',
+    color: '#D85C43',
+    fontSize: 16,
+    fontWeight: '700',
+  },
   ingredientGrid: {
-    borderTopWidth: 1,
-    borderTopColor: '#EFE3D7',
+    borderTopWidth: 0,
   },
   ingredientRow: {
     flexDirection: 'row',
@@ -1274,12 +1778,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EFE3D7',
   },
   ingredientName: {
+    fontFamily: 'MaruBuri',
     flex: 1,
     fontSize: 16,
     fontWeight: '700',
     color: '#36231B',
   },
   ingredientAmount: {
+    fontFamily: 'MaruBuri',
     minWidth: 92,
     marginLeft: 16,
     textAlign: 'right',
@@ -1297,37 +1803,64 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#DCCFC2',
     paddingHorizontal: 8,
-    paddingTop: 6,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 12,
     flexDirection: 'row',
     alignItems: 'stretch',
   },
   navItem: {
     flex: 1,
     borderRadius: 0,
-    paddingVertical: 6,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: 4,
+  },
+  navCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navAddButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#D85C43',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -22,
+    shadowColor: '#D85C43',
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  navAddIcon: {
+    color: '#FFFFFF',
+    fontSize: 30,
+    lineHeight: 32,
+    fontWeight: '300',
   },
   navItemActive: {
-    backgroundColor: '#ECE2D5',
+    backgroundColor: 'transparent',
   },
   navIcon: {
     fontSize: 18,
     lineHeight: 20,
-    color: '#2E241F',
+    color: '#9A948D',
   },
   navIconActive: {
     color: '#111111',
+    fontWeight: '700',
   },
   navLabel: {
-    color: '#2E241F',
+    color: '#7E786F',
     fontWeight: '600',
     fontSize: 9,
     letterSpacing: 0.4,
   },
   navLabelActive: {
     color: '#111111',
+    fontWeight: '700',
   },
 });
