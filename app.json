@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "home-add-ai-recipebook-1-recipebook",
-    "slug": "home-add-ai-recipebook-1-recipebook",
+    "name": "RecipeBook",
+    "slug": "recipebook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
