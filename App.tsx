@@ -549,8 +549,16 @@ export default function App() {
         </View>
 
         <View style={styles.bottomNav}>
-          <NavItem label="Home" active={view.name === 'home'} onPress={() => setView({ name: 'home' })} />
-          <NavItem label="Add +" active={view.name === 'add' || view.name === 'link' || view.name === 'manual'} onPress={() => setView({ name: 'add' })} />
+          <NavItem
+            icon="⌂"
+            label="CREATE"
+            active={view.name === 'add' || view.name === 'link' || view.name === 'manual'}
+            onPress={() => setView({ name: 'add' })}
+          />
+          <NavItem icon="▤" label="BLOGS" active={false} onPress={() => setView({ name: 'home' })} />
+          <NavItem icon="◌" label="WORKSHOPS" active={false} onPress={() => setView({ name: 'home' })} />
+          <NavItem icon="◔" label="RECIPES" active={view.name === 'detail'} onPress={() => setView({ name: 'home' })} />
+          <NavItem icon="⌕" label="SEARCH" active={view.name === 'home'} onPress={() => setView({ name: 'home' })} />
         </View>
       </View>
     </SafeAreaView>
@@ -747,16 +755,19 @@ function ManualGridEditor({
 }
 
 function NavItem({
+  icon,
   label,
   active,
   onPress,
 }: {
+  icon: string;
   label: string;
   active: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.navItem, active && styles.navItemActive]}>
+      <Text style={[styles.navIcon, active && styles.navIconActive]}>{icon}</Text>
       <Text style={[styles.navLabel, active && styles.navLabelActive]}>{label}</Text>
     </Pressable>
   );
@@ -1281,29 +1292,42 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#36231B',
+    backgroundColor: '#F3ECE2',
     borderRadius: 0,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#DCCFC2',
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 8,
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'stretch',
   },
   navItem: {
     flex: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 0,
+    paddingVertical: 6,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
   },
   navItemActive: {
-    backgroundColor: '#D85C43',
+    backgroundColor: '#ECE2D5',
+  },
+  navIcon: {
+    fontSize: 18,
+    lineHeight: 20,
+    color: '#2E241F',
+  },
+  navIconActive: {
+    color: '#111111',
   },
   navLabel: {
-    color: '#EADFD6',
-    fontWeight: '700',
-    fontSize: 15,
+    color: '#2E241F',
+    fontWeight: '600',
+    fontSize: 9,
+    letterSpacing: 0.4,
   },
   navLabelActive: {
-    color: '#FFF9F4',
+    color: '#111111',
   },
 });
