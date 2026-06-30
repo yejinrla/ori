@@ -18,10 +18,9 @@ export default function RecipesScreen() {
       : recipes.filter((recipe) => recipe.category === recipeFilter);
 
   return (
-    <Screen>
+    <Screen title="내 레시피">
       <View style={styles.recipesScreen}>
         <View style={styles.recipesHeader}>
-          <Text style={styles.recipesTitle}>내 레시피</Text>
           <Text style={styles.recipesCount}>{visibleRecipes.length}개의 레시피</Text>
         </View>
         <ScrollView

@@ -34,7 +34,7 @@ export default function SearchScreen() {
   const trimmed = query.trim();
 
   return (
-    <Screen back>
+    <Screen back title="검색">
       <View style={styles.searchScreen}>
         <View style={styles.homeSearchWrap}>
           <SearchIcon />

@@ -7,9 +7,8 @@ import { styles } from '../../src/styles';
 
 export default function AddScreen() {
   return (
-    <Screen back>
+    <Screen back title="레시피 추가">
       <View style={styles.content}>
-        <Text style={styles.screenTitle}>레시피 추가</Text>
         <Text style={styles.screenDescription}>
           인터넷 링크를 가져오거나 직접 작성해서 나만의 레시피북에 저장하세요.
         </Text>

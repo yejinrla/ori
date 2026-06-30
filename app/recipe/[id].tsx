@@ -14,7 +14,7 @@ export default function RecipeDetailScreen() {
 
   if (!recipe) {
     return (
-      <Screen back>
+      <Screen back title="레시피">
         <View style={styles.content}>
           <Text style={styles.screenTitle}>레시피를 찾을 수 없습니다.</Text>
         </View>
@@ -23,7 +23,7 @@ export default function RecipeDetailScreen() {
   }
 
   return (
-    <Screen back>
+    <Screen back title="레시피">
       <ScrollView contentContainerStyle={styles.detailContent}>
         <Text style={styles.detailTitleTop}>{recipe.title}</Text>
 

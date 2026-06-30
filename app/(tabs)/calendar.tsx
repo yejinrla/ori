@@ -47,7 +47,7 @@ export default function CalendarScreen() {
     : null;
 
   return (
-    <Screen>
+    <Screen title="캘린더">
       <ScrollView contentContainerStyle={styles.calendarContent} showsVerticalScrollIndicator={false}>
         <View style={styles.calMonthBar}>
           <Pressable hitSlop={8} onPress={() => goMonth(-1)} style={styles.calMonthNav}>

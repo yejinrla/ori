@@ -11,7 +11,7 @@ export default function MyPageScreen() {
   const favoriteCount = recipes.filter((recipe) => recipe.favorite).length;
 
   return (
-    <Screen>
+    <Screen title="마이페이지">
       <ScrollView contentContainerStyle={styles.mypageContent} showsVerticalScrollIndicator={false}>
         <View style={styles.mypageProfile}>
           <View style={styles.mypageAvatar}>

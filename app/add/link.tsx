@@ -56,9 +56,8 @@ export default function LinkImporterScreen() {
   };
 
   return (
-    <Screen back>
+    <Screen back title="링크 가져오기">
       <View style={styles.content}>
-        <Text style={styles.screenTitle}>링크 가져오기</Text>
         <Text style={styles.screenDescription}>
           링크를 붙여넣으면 AI가 본문을 분석해 제목, 재료, 양념, 순서를 정리합니다.
         </Text>
