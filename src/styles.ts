@@ -459,6 +459,12 @@ export const styles = StyleSheet.create({
     paddingBottom: 18,
     justifyContent: 'center',
   },
+  featuredImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 18,
+    resizeMode: 'cover',
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -490,6 +496,12 @@ export const styles = StyleSheet.create({
   },
   listCardEmoji: {
     fontSize: 28,
+  },
+  listCardImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#F2F1ED',
   },
   listCardTextBlock: {
     flex: 1,
@@ -714,6 +726,64 @@ export const styles = StyleSheet.create({
     padding: 18,
     gap: 14,
   },
+  photoUploadCard: {
+    borderRadius: 22,
+    backgroundColor: '#F6EFE7',
+    overflow: 'hidden',
+    marginBottom: 2,
+  },
+  photoUploadPlaceholder: {
+    minHeight: 188,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 28,
+  },
+  photoUploadPlus: {
+    fontSize: 34,
+    lineHeight: 38,
+    color: '#A26A42',
+    marginBottom: 10,
+  },
+  photoUploadTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#36231B',
+    marginBottom: 8,
+  },
+  photoUploadDescription: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#8C6D5E',
+    textAlign: 'center',
+  },
+  photoUploadPreview: {
+    width: '100%',
+    height: 220,
+    resizeMode: 'cover',
+  },
+  photoUploadFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#FFF9F4',
+  },
+  photoUploadAction: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7B5C4E',
+  },
+  photoUploadRemove: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#A34C31',
+  },
   fieldBlock: {
     gap: 8,
   },
@@ -828,6 +898,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     marginBottom: 20,
+  },
+  detailPhotoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   detailPhotoEmoji: {
     fontSize: 150,

@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 
 import type { Recipe } from '../data';
 import { styles } from '../styles';
@@ -35,7 +35,11 @@ export function FeaturedCard({
         </View>
       </View>
       <View style={styles.featuredImageArea}>
-        <Text style={styles.featuredEmoji}>{emoji}</Text>
+        {recipe.photo ? (
+          <Image source={{ uri: recipe.photo }} style={styles.featuredImage} />
+        ) : (
+          <Text style={styles.featuredEmoji}>{emoji}</Text>
+        )}
       </View>
     </Pressable>
   );

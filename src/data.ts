@@ -8,6 +8,7 @@ export type Recipe = {
   steps: string[];
   memo: string;
   image: string;
+  photo?: string;
   cookTime?: string;
   rating?: number;
   sourceUrl?: string;
@@ -25,7 +26,7 @@ export type ManualItemRow = {
 export type ManualRecipeForm = {
   title: string;
   category: string;
-  image: string;
+  photo: string | null;
   ingredients: ManualItemRow[];
   seasonings: ManualItemRow[];
   steps: string;
@@ -103,7 +104,7 @@ export const initialRecipes: Recipe[] = [
 export const emptyManualForm: ManualRecipeForm = {
   title: '',
   category: '',
-  image: '🍳',
+  photo: null,
   ingredients: [
     { id: 'ingredient-1', name: '', amount: '' },
     { id: 'ingredient-2', name: '', amount: '' },

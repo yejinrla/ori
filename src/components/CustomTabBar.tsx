@@ -1,5 +1,5 @@
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { router } from 'expo-router';
+import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
 import { Pressable, Text, View } from 'react-native';
 
 import { styles } from '../styles';

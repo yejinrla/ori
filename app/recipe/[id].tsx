@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Screen } from '../../src/components/Screen';
 import { TagRow } from '../../src/components/TagRow';
@@ -28,7 +28,11 @@ export default function RecipeDetailScreen() {
         <Text style={styles.detailTitleTop}>{recipe.title}</Text>
 
         <View style={styles.detailPhoto}>
-          <Text style={styles.detailPhotoEmoji}>{recipe.image}</Text>
+          {recipe.photo ? (
+            <Image source={{ uri: recipe.photo }} style={styles.detailPhotoImage} />
+          ) : (
+            <Text style={styles.detailPhotoEmoji}>{recipe.image}</Text>
+          )}
         </View>
 
         <View style={styles.detailMetaList}>

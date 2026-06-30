@@ -1,6 +1,7 @@
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { FormField } from '../../src/components/FormField';
 import { ManualGridEditor } from '../../src/components/ManualGridEditor';
@@ -12,6 +13,28 @@ import { styles } from '../../src/styles';
 export default function ManualFormScreen() {
   const { addRecipe } = useRecipes();
   const [manualForm, setManualForm] = useState(emptyManualForm);
+
+  const pickPhoto = async () => {
+    if (Platform.OS !== 'web') {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]?.uri) {
+      return;
+    }
+
+    setManualForm((current) => ({ ...current, photo: result.assets[0].uri }));
+  };
 
   const updateManualRows = (
     field: 'ingredients' | 'seasonings',
@@ -70,7 +93,8 @@ export default function ManualFormScreen() {
       seasonings: toList(manualForm.seasonings),
       steps: toStepList(manualForm.steps),
       memo: manualForm.memo.trim(),
-      image: manualForm.image.trim() || '🍳',
+      image: '🍳',
+      photo: manualForm.photo ?? undefined,
       sourceType: 'manual',
       favorite: false,
       addedAt: '2026.06.30',
@@ -88,21 +112,41 @@ export default function ManualFormScreen() {
           메모처럼 적어도 번호와 태그가 자동 정리되는 개인 레시피 작성 화면입니다.
         </Text>
         <View style={styles.formCard}>
+          <Pressable style={styles.photoUploadCard} onPress={pickPhoto}>
+            {manualForm.photo ? (
+              <Image source={{ uri: manualForm.photo }} style={styles.photoUploadPreview} />
+            ) : (
+              <View style={styles.photoUploadPlaceholder}>
+                <Text style={styles.photoUploadPlus}>+</Text>
+                <Text style={styles.photoUploadTitle}>사진 등록</Text>
+                <Text style={styles.photoUploadDescription}>
+                  레시피 사진을 올리면 카드와 상세 화면에 함께 보여요.
+                </Text>
+              </View>
+            )}
+            <View style={styles.photoUploadFooter}>
+              <Text style={styles.photoUploadAction}>
+                {manualForm.photo ? '사진 변경' : '갤러리에서 선택'}
+              </Text>
+              {manualForm.photo ? (
+                <Pressable
+                  hitSlop={8}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    setManualForm((current) => ({ ...current, photo: null }));
+                  }}
+                >
+                  <Text style={styles.photoUploadRemove}>삭제</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          </Pressable>
           <FormField label="제목">
             <TextInput
               style={styles.input}
               value={manualForm.title}
               onChangeText={(value) => setManualForm((current) => ({ ...current, title: value }))}
               placeholder="예: 김치찌개"
-              placeholderTextColor="#8C7A70"
-            />
-          </FormField>
-          <FormField label="사진 또는 이모지">
-            <TextInput
-              style={styles.input}
-              value={manualForm.image}
-              onChangeText={(value) => setManualForm((current) => ({ ...current, image: value }))}
-              placeholder="예: 🍲"
               placeholderTextColor="#8C7A70"
             />
           </FormField>
