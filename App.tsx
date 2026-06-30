@@ -269,6 +269,18 @@ export default function App() {
           </View>
         </View>
       </View>
+
+      <SectionHeader title="최근 추가한 레시피" />
+      <View style={styles.listColumn}>
+        {recentRecipes.map((recipe) => (
+          <RecipeListCard
+            key={recipe.id}
+            recipe={recipe}
+            onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+            onFavorite={() => toggleFavorite(recipe.id)}
+          />
+        ))}
+      </View>
     </ScrollView>
   );
 
