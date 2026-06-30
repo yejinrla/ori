@@ -242,10 +242,10 @@ export default function App() {
   const renderHome = () => (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.heroCard}>
-        <Text style={styles.heroEyebrow}>🧑‍🍳🦆 오늘의 요리</Text>
+        <Text style={styles.heroEyebrow}>서비스 소개</Text>
         <Text style={styles.heroTitle}>쉐프 모자를 쓴 오리와 함께 오늘의 레시피를 모아보세요.</Text>
         <Text style={styles.heroDescription}>
-          유튜브, 인스타, 블로그에 흩어진 레시피를 AI가 정리해 내 방식의 개인 레시피북으로 모읍니다.
+          유튜브, 인스타, 블로그에 흩어진 레시피를 AI가 정리해 나만의 개인 레시피북으로 모아보세요.
         </Text>
       </View>
 
@@ -258,7 +258,24 @@ export default function App() {
           value={query}
           onChangeText={setQuery}
         />
-        <Text style={styles.searchHint}>예: 김치 감자 닭 매운 간단</Text>
+        <Text style={styles.searchHintLabel}>이런 식으로 찾아보세요</Text>
+        <View style={styles.searchHintTags}>
+          <View style={styles.searchHintChip}>
+            <Text style={styles.searchHintChipText}>김치</Text>
+          </View>
+          <View style={styles.searchHintChip}>
+            <Text style={styles.searchHintChipText}>감자</Text>
+          </View>
+          <View style={styles.searchHintChip}>
+            <Text style={styles.searchHintChipText}>닭</Text>
+          </View>
+          <View style={styles.searchHintChip}>
+            <Text style={styles.searchHintChipText}>매운맛</Text>
+          </View>
+          <View style={styles.searchHintChip}>
+            <Text style={styles.searchHintChipText}>간단</Text>
+          </View>
+        </View>
       </View>
 
       <SectionHeader
@@ -707,7 +724,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 150,
     gap: 16,
   },
   heroCard: {
@@ -726,8 +743,8 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: '#FFF9F4',
     fontSize: 30,
-    lineHeight: 36,
-    fontWeight: '800',
+    lineHeight: 42,
+    fontWeight: '700',
   },
   heroDescription: {
     color: '#EADFD6',
@@ -748,9 +765,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#36231B',
   },
-  searchHint: {
+  searchHintLabel: {
     color: '#7C5D4F',
     fontSize: 13,
+    fontWeight: '600',
+  },
+  searchHintTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  searchHintChip: {
+    backgroundColor: '#F3D9AC',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  searchHintChipText: {
+    color: '#745748',
+    fontSize: 12,
+    fontWeight: '700',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1020,7 +1054,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 18,
+    bottom: 8,
     backgroundColor: '#36231B',
     borderRadius: 24,
     padding: 10,
