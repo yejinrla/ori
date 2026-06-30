@@ -34,6 +34,7 @@ type ViewState =
   | { name: 'home' }
   | { name: 'search' }
   | { name: 'recipes' }
+  | { name: 'calendar' }
   | { name: 'add' }
   | { name: 'link' }
   | { name: 'manual' }
@@ -149,6 +150,17 @@ const emptyManualForm: ManualRecipeForm = {
   tags: '',
 };
 
+// 요리한 날짜(ISO) → 그날 만든 레시피 id 목록
+const cookingLog: Record<string, string[]> = {
+  '2026-06-25': ['2'],
+  '2026-06-27': ['1'],
+  '2026-06-28': ['3'],
+  '2026-06-29': ['2', '3'],
+  '2026-06-30': ['1'],
+};
+
+const weekdayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+
 const categoryColors: Record<string, string> = {
   한식: '#D85C43',
   간식: '#E8A93B',
@@ -169,6 +181,9 @@ export default function App() {
   const [linkInput, setLinkInput] = useState('');
   const [manualForm, setManualForm] = useState<ManualRecipeForm>(emptyManualForm);
   const [recipeFilter, setRecipeFilter] = useState('전체');
+  const [calendarYear, setCalendarYear] = useState(2026);
+  const [calendarMonth, setCalendarMonth] = useState(5); // 0-indexed: 5 = 6월
+  const [selectedDate, setSelectedDate] = useState<string | null>('2026-06-30');
 
   const filteredRecipes = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -462,6 +477,139 @@ export default function App() {
     );
   };
 
+  const renderCalendar = () => {
+    const toIso = (year: number, month: number, day: number) =>
+      `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const firstWeekday = new Date(calendarYear, calendarMonth, 1).getDay();
+    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    const cells: (number | null)[] = [];
+    for (let i = 0; i < firstWeekday; i += 1) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d += 1) cells.push(d);
+
+    const goMonth = (delta: number) => {
+      setSelectedDate(null);
+      const next = calendarMonth + delta;
+      if (next < 0) {
+        setCalendarMonth(11);
+        setCalendarYear((y) => y - 1);
+      } else if (next > 11) {
+        setCalendarMonth(0);
+        setCalendarYear((y) => y + 1);
+      } else {
+        setCalendarMonth(next);
+      }
+    };
+
+    const cookedRecipes = (selectedDate ? cookingLog[selectedDate] ?? [] : [])
+      .map((id) => recipes.find((recipe) => recipe.id === id))
+      .filter((recipe): recipe is Recipe => Boolean(recipe));
+
+    const selectedLabel = selectedDate
+      ? `${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일`
+      : null;
+
+    return (
+      <ScrollView
+        contentContainerStyle={styles.calendarContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.calMonthBar}>
+          <Pressable hitSlop={8} onPress={() => goMonth(-1)} style={styles.calMonthNav}>
+            <Text style={styles.calMonthNavText}>‹</Text>
+          </Pressable>
+          <Text style={styles.calMonthLabel}>
+            {calendarYear}년 {calendarMonth + 1}월
+          </Text>
+          <Pressable hitSlop={8} onPress={() => goMonth(1)} style={styles.calMonthNav}>
+            <Text style={styles.calMonthNavText}>›</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.calWeekRow}>
+          {weekdayLabels.map((label, index) => (
+            <View key={label} style={styles.calCell}>
+              <Text
+                style={[
+                  styles.calWeekText,
+                  index === 0 && styles.calSunday,
+                  index === 6 && styles.calSaturday,
+                ]}
+              >
+                {label}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.calGrid}>
+          {cells.map((day, index) => {
+            if (day === null) {
+              return <View key={`empty-${index}`} style={styles.calCell} />;
+            }
+            const iso = toIso(calendarYear, calendarMonth, day);
+            const isSelected = iso === selectedDate;
+            const hasLog = (cookingLog[iso]?.length ?? 0) > 0;
+            const weekday = index % 7;
+            return (
+              <View key={iso} style={styles.calCell}>
+                <Pressable
+                  onPress={() => setSelectedDate(iso)}
+                  style={[styles.calDay, isSelected && styles.calDaySelected]}
+                >
+                  <Text
+                    style={[
+                      styles.calDayText,
+                      weekday === 0 && styles.calSunday,
+                      weekday === 6 && styles.calSaturday,
+                      isSelected && styles.calDayTextSelected,
+                    ]}
+                  >
+                    {day}
+                  </Text>
+                  <View
+                    style={[
+                      styles.calDot,
+                      hasLog && styles.calDotActive,
+                      isSelected && hasLog && styles.calDotOnSelected,
+                    ]}
+                  />
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={styles.calLogSection}>
+          <Text style={styles.calLogTitle}>
+            {selectedLabel ? `${selectedLabel}에 만든 요리` : '날짜를 선택해보세요'}
+          </Text>
+          {selectedDate && cookedRecipes.length === 0 ? (
+            <Text style={styles.calLogEmpty}>이 날 만든 요리 기록이 없어요.</Text>
+          ) : (
+            cookedRecipes.map((recipe) => (
+              <Pressable
+                key={recipe.id}
+                style={styles.calRecipeRow}
+                onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+              >
+                <Text style={styles.calRecipeEmoji}>{recipe.image}</Text>
+                <View style={styles.calRecipeText}>
+                  <Text style={styles.calRecipeTitle}>{recipe.title}</Text>
+                  <Text style={styles.calRecipeMeta}>
+                    {recipe.category}
+                    {recipe.cookTime ? ` · ${recipe.cookTime}` : ''}
+                  </Text>
+                </View>
+                <Text style={styles.calRecipeChevron}>›</Text>
+              </Pressable>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    );
+  };
+
   const renderAdd = () => (
     <View style={styles.content}>
       <Text style={styles.screenTitle}>레시피 추가</Text>
@@ -726,6 +874,7 @@ export default function App() {
           {view.name === 'home' && renderHome()}
           {view.name === 'search' && renderSearch()}
           {view.name === 'recipes' && renderRecipes()}
+          {view.name === 'calendar' && renderCalendar()}
           {view.name === 'add' && renderAdd()}
           {view.name === 'link' && renderLinkImporter()}
           {view.name === 'manual' && renderManualForm()}
@@ -755,8 +904,8 @@ export default function App() {
             icon="▦"
             activeIcon="▣"
             label="캘린더"
-            active={false}
-            onPress={() => setView({ name: 'home' })}
+            active={view.name === 'calendar'}
+            onPress={() => setView({ name: 'calendar' })}
           />
           <NavItem
             icon="◍"
@@ -1208,6 +1357,137 @@ const styles = StyleSheet.create({
   },
   recipesListScroll: {
     flex: 1,
+  },
+  calendarContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 150,
+  },
+  calMonthBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  calMonthNav: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calMonthNavText: {
+    fontSize: 26,
+    color: '#36231B',
+  },
+  calMonthLabel: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F1B18',
+  },
+  calWeekRow: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  calGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calCell: {
+    width: '14.2857%',
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calWeekText: {
+    fontFamily: 'MaruBuri',
+    fontSize: 12,
+    color: '#9A948D',
+  },
+  calSunday: {
+    color: '#D85C43',
+  },
+  calSaturday: {
+    color: '#5478A8',
+  },
+  calDay: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calDaySelected: {
+    backgroundColor: '#36231B',
+  },
+  calDayText: {
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    color: '#3F2F27',
+  },
+  calDayTextSelected: {
+    color: '#FFF9F4',
+    fontWeight: '700',
+  },
+  calDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    marginTop: 3,
+    backgroundColor: 'transparent',
+  },
+  calDotActive: {
+    backgroundColor: '#D85C43',
+  },
+  calDotOnSelected: {
+    backgroundColor: '#F3D9AC',
+  },
+  calLogSection: {
+    marginTop: 18,
+    gap: 10,
+  },
+  calLogTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F1B18',
+    marginBottom: 2,
+  },
+  calLogEmpty: {
+    fontFamily: 'MaruBuri',
+    fontSize: 14,
+    color: '#947B6E',
+    paddingVertical: 8,
+  },
+  calRecipeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: '#FFF9F4',
+    borderRadius: 16,
+    padding: 14,
+  },
+  calRecipeEmoji: {
+    fontSize: 30,
+  },
+  calRecipeText: {
+    flex: 1,
+  },
+  calRecipeTitle: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F1B18',
+  },
+  calRecipeMeta: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    color: '#8C6D5E',
+    marginTop: 2,
+  },
+  calRecipeChevron: {
+    fontSize: 22,
+    color: '#B6A99E',
   },
   recipeFilterChip: {
     height: 36,
