@@ -291,14 +291,16 @@ export default function App() {
         인터넷 링크를 가져오거나 직접 작성해서 나만의 레시피북에 저장하세요.
       </Text>
       <Pressable style={styles.primaryOption} onPress={() => setView({ name: 'link' })}>
-        <Text style={styles.optionEmoji}>🔗</Text>
+        <OptionIcon variant="link" tone="dark" />
         <View style={styles.optionTextBlock}>
           <Text style={styles.optionTitle}>링크 가져오기</Text>
-          <Text style={styles.optionDescription}>YouTube, Instagram, 블로그 링크를 AI가 레시피로 정리</Text>
+          <Text style={styles.optionDescriptionOnDark}>
+            YouTube, Instagram, 블로그 링크를 AI가 레시피로 정리
+          </Text>
         </View>
       </Pressable>
       <Pressable style={styles.secondaryOption} onPress={() => setView({ name: 'manual' })}>
-        <Text style={styles.optionEmoji}>✍️</Text>
+        <OptionIcon variant="note" tone="light" />
         <View style={styles.optionTextBlock}>
           <Text style={styles.optionTitle}>직접 작성</Text>
           <Text style={styles.optionDescription}>재료, 양념, 조리 순서, 메모를 직접 입력해 저장</Text>
@@ -649,6 +651,38 @@ function NavItem({
   );
 }
 
+function OptionIcon({
+  variant,
+  tone,
+}: {
+  variant: 'link' | 'note';
+  tone: 'dark' | 'light';
+}) {
+  const isDark = tone === 'dark';
+  const stroke = isDark ? '#FFFFFF' : '#6F5549';
+  const background = isDark ? 'rgba(255,255,255,0.06)' : '#F4E6D8';
+
+  return (
+    <View style={[styles.optionIconFrame, { backgroundColor: background, borderColor: stroke }]}>
+      {variant === 'link' ? (
+        <View style={styles.optionLinkIcon}>
+          <View style={[styles.optionLinkLoop, { borderColor: stroke }]} />
+          <View style={[styles.optionLinkBridge, { backgroundColor: stroke }]} />
+          <View style={[styles.optionLinkLoop, { borderColor: stroke, marginLeft: -6 }]} />
+        </View>
+      ) : (
+        <View style={styles.optionNoteIcon}>
+          <View style={[styles.optionNoteSheet, { borderColor: stroke }]}>
+            <View style={[styles.optionNoteLine, { backgroundColor: stroke }]} />
+            <View style={[styles.optionNoteLineShort, { backgroundColor: stroke }]} />
+          </View>
+          <View style={[styles.optionPenBody, { backgroundColor: stroke }]} />
+        </View>
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -660,7 +694,7 @@ const styles = StyleSheet.create({
   topBar: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 10,
+    paddingBottom: 18,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -842,11 +876,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     color: '#36231B',
+    marginBottom: 8,
   },
   screenDescription: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#6E5549',
+    color: '#947B6E',
+    marginBottom: 8,
   },
   primaryOption: {
     backgroundColor: '#36231B',
@@ -854,6 +890,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flexDirection: 'row',
     gap: 14,
+    alignItems: 'center',
   },
   secondaryOption: {
     backgroundColor: '#FFF9F4',
@@ -861,9 +898,64 @@ const styles = StyleSheet.create({
     padding: 20,
     flexDirection: 'row',
     gap: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8D7CA',
   },
-  optionEmoji: {
-    fontSize: 28,
+  optionIconFrame: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionLinkIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  optionLinkLoop: {
+    width: 12,
+    height: 8,
+    borderWidth: 1.5,
+    borderRadius: 999,
+    transform: [{ rotate: '-35deg' }],
+  },
+  optionLinkBridge: {
+    width: 7,
+    height: 1.5,
+    marginHorizontal: -2,
+  },
+  optionNoteIcon: {
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+  },
+  optionNoteSheet: {
+    width: 14,
+    height: 16,
+    borderWidth: 1.5,
+    borderRadius: 3,
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  optionNoteLine: {
+    height: 1.5,
+    borderRadius: 999,
+    marginBottom: 3,
+  },
+  optionNoteLineShort: {
+    width: 7,
+    height: 1.5,
+    borderRadius: 999,
+  },
+  optionPenBody: {
+    position: 'absolute',
+    width: 9,
+    height: 1.5,
+    right: -1,
+    bottom: 2,
+    transform: [{ rotate: '-35deg' }],
   },
   optionTextBlock: {
     flex: 1,
@@ -878,6 +970,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: '#71594D',
+  },
+  optionDescriptionOnDark: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#FFFFFF',
   },
   panel: {
     backgroundColor: '#FFF9F4',
@@ -984,18 +1081,20 @@ const styles = StyleSheet.create({
   },
   bottomNav: {
     position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 8,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#36231B',
-    borderRadius: 24,
-    padding: 10,
+    borderRadius: 0,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
   },
   navItem: {
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
