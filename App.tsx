@@ -150,14 +150,22 @@ const emptyManualForm: ManualRecipeForm = {
   tags: '',
 };
 
-// 요리한 날짜(ISO) → 그날 만든 레시피 id 목록
-const cookingLog: Record<string, string[]> = {
-  '2026-06-25': ['2'],
-  '2026-06-27': ['1'],
-  '2026-06-28': ['3'],
-  '2026-06-29': ['2', '3'],
-  '2026-06-30': ['1'],
+type DayMeals = { breakfast: string[]; lunch: string[]; dinner: string[] };
+
+// 요리한 날짜(ISO) → 끼니별 레시피 id 목록
+const cookingLog: Record<string, DayMeals> = {
+  '2026-06-25': { breakfast: [], lunch: ['2'], dinner: [] },
+  '2026-06-27': { breakfast: [], lunch: [], dinner: ['1'] },
+  '2026-06-28': { breakfast: ['3'], lunch: [], dinner: [] },
+  '2026-06-29': { breakfast: ['2'], lunch: [], dinner: ['3'] },
+  '2026-06-30': { breakfast: [], lunch: ['3'], dinner: ['1'] },
 };
+
+const mealSlots = [
+  { key: 'breakfast', label: '아침', emoji: '🌅' },
+  { key: 'lunch', label: '점심', emoji: '☀️' },
+  { key: 'dinner', label: '저녁', emoji: '🌙' },
+] as const;
 
 const weekdayLabels = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -501,9 +509,11 @@ export default function App() {
       }
     };
 
-    const cookedRecipes = (selectedDate ? cookingLog[selectedDate] ?? [] : [])
-      .map((id) => recipes.find((recipe) => recipe.id === id))
-      .filter((recipe): recipe is Recipe => Boolean(recipe));
+    const dayMeals = selectedDate ? cookingLog[selectedDate] : undefined;
+    const recipesForMeal = (key: keyof DayMeals) =>
+      (dayMeals?.[key] ?? [])
+        .map((id) => recipes.find((recipe) => recipe.id === id))
+        .filter((recipe): recipe is Recipe => Boolean(recipe));
 
     const selectedLabel = selectedDate
       ? `${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일`
@@ -549,7 +559,10 @@ export default function App() {
             }
             const iso = toIso(calendarYear, calendarMonth, day);
             const isSelected = iso === selectedDate;
-            const hasLog = (cookingLog[iso]?.length ?? 0) > 0;
+            const dayLog = cookingLog[iso];
+            const hasLog = dayLog
+              ? dayLog.breakfast.length + dayLog.lunch.length + dayLog.dinner.length > 0
+              : false;
             const weekday = index % 7;
             return (
               <View key={iso} style={styles.calCell}>
@@ -582,29 +595,41 @@ export default function App() {
 
         <View style={styles.calLogSection}>
           <Text style={styles.calLogTitle}>
-            {selectedLabel ? `${selectedLabel}에 만든 요리` : '날짜를 선택해보세요'}
+            {selectedLabel ? `${selectedLabel} 식단` : '날짜를 선택해보세요'}
           </Text>
-          {selectedDate && cookedRecipes.length === 0 ? (
-            <Text style={styles.calLogEmpty}>이 날 만든 요리 기록이 없어요.</Text>
-          ) : (
-            cookedRecipes.map((recipe) => (
-              <Pressable
-                key={recipe.id}
-                style={styles.calRecipeRow}
-                onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
-              >
-                <Text style={styles.calRecipeEmoji}>{recipe.image}</Text>
-                <View style={styles.calRecipeText}>
-                  <Text style={styles.calRecipeTitle}>{recipe.title}</Text>
-                  <Text style={styles.calRecipeMeta}>
-                    {recipe.category}
-                    {recipe.cookTime ? ` · ${recipe.cookTime}` : ''}
-                  </Text>
-                </View>
-                <Text style={styles.calRecipeChevron}>›</Text>
-              </Pressable>
-            ))
-          )}
+          {selectedDate
+            ? mealSlots.map((meal) => {
+                const list = recipesForMeal(meal.key);
+                return (
+                  <View key={meal.key} style={styles.calMealBlock}>
+                    <Text style={styles.calMealLabel}>
+                      {meal.emoji} {meal.label}
+                    </Text>
+                    {list.length === 0 ? (
+                      <Text style={styles.calMealEmpty}>기록 없음</Text>
+                    ) : (
+                      list.map((recipe) => (
+                        <Pressable
+                          key={`${meal.key}-${recipe.id}`}
+                          style={styles.calRecipeRow}
+                          onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
+                        >
+                          <Text style={styles.calRecipeEmoji}>{recipe.image}</Text>
+                          <View style={styles.calRecipeText}>
+                            <Text style={styles.calRecipeTitle}>{recipe.title}</Text>
+                            <Text style={styles.calRecipeMeta}>
+                              {recipe.category}
+                              {recipe.cookTime ? ` · ${recipe.cookTime}` : ''}
+                            </Text>
+                          </View>
+                          <Text style={styles.calRecipeChevron}>›</Text>
+                        </Pressable>
+                      ))
+                    )}
+                  </View>
+                );
+              })
+            : null}
         </View>
       </ScrollView>
     );
@@ -1458,6 +1483,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#947B6E',
     paddingVertical: 8,
+  },
+  calMealBlock: {
+    gap: 8,
+    marginTop: 6,
+  },
+  calMealLabel: {
+    fontFamily: 'MaruBuriSemiBold',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7B5C4E',
+  },
+  calMealEmpty: {
+    fontFamily: 'MaruBuri',
+    fontSize: 13,
+    color: '#B6A99E',
+    paddingVertical: 2,
   },
   calRecipeRow: {
     flexDirection: 'row',
