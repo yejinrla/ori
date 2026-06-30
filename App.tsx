@@ -242,15 +242,15 @@ export default function App() {
   const renderHome = () => (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.heroCard}>
-        <Text style={styles.heroEyebrow}>RecipeBook</Text>
-        <Text style={styles.heroTitle}>링크는 저장하지 말고, 레시피를 저장하세요.</Text>
+        <Text style={styles.heroEyebrow}>🧑‍🍳🦆 오늘의 요리</Text>
+        <Text style={styles.heroTitle}>쉐프 모자를 쓴 오리와 함께 오늘의 레시피를 모아보세요.</Text>
         <Text style={styles.heroDescription}>
           유튜브, 인스타, 블로그에 흩어진 레시피를 AI가 정리해 내 방식의 개인 레시피북으로 모읍니다.
         </Text>
       </View>
 
       <View style={styles.searchCard}>
-        <Text style={styles.sectionTitle}>오늘 뭐 먹지?</Text>
+        <Text style={styles.sectionTitle}>오늘의 요리</Text>
         <TextInput
           placeholder="음식, 재료, 태그로 검색"
           placeholderTextColor="#8C7A70"
@@ -519,7 +519,7 @@ export default function App() {
       <StatusBar style="dark" />
       <View style={styles.appShell}>
         <View style={styles.topBar}>
-          <Text style={styles.topBarTitle}>RecipeBook</Text>
+          <Text style={styles.topBarTitle}>🧑‍🍳🦆 오늘의 요리</Text>
           {view.name !== 'home' ? (
             <Pressable onPress={() => setView({ name: 'home' })}>
               <Text style={styles.topBarAction}>Home</Text>
