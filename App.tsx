@@ -1152,6 +1152,7 @@ const styles = StyleSheet.create({
   manualGridBox: {
     backgroundColor: '#F6EFE7',
     borderRadius: 18,
+    width: '100%',
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 10,
@@ -1159,7 +1160,7 @@ const styles = StyleSheet.create({
   },
   manualGridHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 2,
     paddingBottom: 8,
   },
@@ -1170,6 +1171,7 @@ const styles = StyleSheet.create({
     color: '#8B7266',
   },
   manualGridRow: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
@@ -1178,6 +1180,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#E8DDD3',
   },
   manualGridInput: {
+    minWidth: 0,
+    flexShrink: 1,
     fontSize: 16,
     color: '#36231B',
     paddingVertical: 4,
@@ -1186,7 +1190,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   manualGridAmountInput: {
-    width: 112,
+    width: 96,
+    flexShrink: 0,
     textAlign: 'right',
   },
   manualGridAddButton: {
