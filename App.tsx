@@ -269,54 +269,6 @@ export default function App() {
           </View>
         </View>
       </View>
-
-      <SectionHeader
-        title="최근 레시피"
-        actionLabel="링크 가져오기"
-        onPress={() => setView({ name: 'link' })}
-      />
-      <View style={styles.rowGrid}>
-        {recentRecipes.map((recipe) => (
-          <RecipePreviewCard
-            key={recipe.id}
-            recipe={recipe}
-            onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
-          />
-        ))}
-      </View>
-
-      <SectionHeader
-        title="즐겨찾기"
-        actionLabel="직접 작성"
-        onPress={() => setView({ name: 'manual' })}
-      />
-      <View style={styles.favoriteList}>
-        {favoriteRecipes.map((recipe) => (
-          <Pressable
-            key={recipe.id}
-            onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
-            style={styles.favoriteItem}
-          >
-            <Text style={styles.favoriteEmoji}>⭐</Text>
-            <View style={styles.favoriteTextBlock}>
-              <Text style={styles.favoriteTitle}>{recipe.title}</Text>
-              <Text style={styles.favoriteSubtitle}>{recipe.category}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </View>
-
-      <SectionHeader title="내 레시피" actionLabel={`${filteredRecipes.length}개`} />
-      <View style={styles.listColumn}>
-        {filteredRecipes.map((recipe) => (
-          <RecipeListCard
-            key={recipe.id}
-            recipe={recipe}
-            onPress={() => setView({ name: 'detail', recipeId: recipe.id })}
-            onFavorite={() => toggleFavorite(recipe.id)}
-          />
-        ))}
-      </View>
     </ScrollView>
   );
 
