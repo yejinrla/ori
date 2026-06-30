@@ -241,14 +241,6 @@ export default function App() {
 
   const renderHome = () => (
     <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.heroCard}>
-        <Text style={styles.heroEyebrow}>서비스 소개</Text>
-        <Text style={styles.heroTitle}>쉐프 모자를 쓴 오리와 함께 오늘의 레시피를 모아보세요.</Text>
-        <Text style={styles.heroDescription}>
-          유튜브, 인스타, 블로그에 흩어진 레시피를 AI가 정리해 나만의 개인 레시피북으로 모아보세요.
-        </Text>
-      </View>
-
       <View style={styles.searchCard}>
         <Text style={styles.sectionTitle}>오늘의 요리</Text>
         <TextInput
@@ -536,7 +528,7 @@ export default function App() {
       <StatusBar style="dark" />
       <View style={styles.appShell}>
         <View style={styles.topBar}>
-          <Text style={styles.topBarTitle}>🧑‍🍳🦆 오늘의 요리</Text>
+          <Text style={styles.topBarTitle}>오늘의 요리</Text>
           {view.name !== 'home' ? (
             <Pressable onPress={() => setView({ name: 'home' })}>
               <Text style={styles.topBarAction}>Home</Text>
@@ -726,30 +718,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 150,
     gap: 16,
-  },
-  heroCard: {
-    backgroundColor: '#36231B',
-    borderRadius: 28,
-    padding: 24,
-    gap: 10,
-  },
-  heroEyebrow: {
-    color: '#F0CC84',
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  heroTitle: {
-    color: '#FFF9F4',
-    fontSize: 30,
-    lineHeight: 42,
-    fontWeight: '700',
-  },
-  heroDescription: {
-    color: '#EADFD6',
-    fontSize: 15,
-    lineHeight: 22,
   },
   searchCard: {
     backgroundColor: '#FCE8C8',
