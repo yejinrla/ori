@@ -10,6 +10,7 @@ export function ManualGridEditor({
   onNameChange,
   onAmountChange,
   onAddRow,
+  onRemoveRow,
 }: {
   rows: ManualItemRow[];
   namePlaceholder: string;
@@ -17,12 +18,14 @@ export function ManualGridEditor({
   onNameChange: (rowId: string, value: string) => void;
   onAmountChange: (rowId: string, value: string) => void;
   onAddRow: () => void;
+  onRemoveRow: (rowId: string) => void;
 }) {
   return (
     <View style={styles.manualGridBox}>
       <View style={styles.manualGridHeader}>
         <Text style={styles.manualGridHeaderText}>항목</Text>
         <Text style={styles.manualGridHeaderText}>수량</Text>
+        <View style={styles.manualGridRowActionSpacer} />
       </View>
       {rows.map((row) => (
         <View key={row.id} style={styles.manualGridRow}>
@@ -40,6 +43,13 @@ export function ManualGridEditor({
             placeholder={amountPlaceholder}
             placeholderTextColor="#9A877C"
           />
+          <Pressable
+            style={styles.manualGridDelete}
+            onPress={() => onRemoveRow(row.id)}
+            hitSlop={6}
+          >
+            <Text style={styles.manualGridDeleteText}>−</Text>
+          </Pressable>
         </View>
       ))}
       <Pressable style={styles.manualGridAddButton} onPress={onAddRow}>

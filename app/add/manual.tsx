@@ -35,6 +35,13 @@ export default function ManualFormScreen() {
     }));
   };
 
+  const removeManualRow = (field: 'ingredients' | 'seasonings', rowId: string) => {
+    setManualForm((current) => ({
+      ...current,
+      [field]: current[field].filter((row) => row.id !== rowId),
+    }));
+  };
+
   const createManualRecipe = () => {
     if (!manualForm.title.trim()) {
       return;
@@ -118,6 +125,7 @@ export default function ManualFormScreen() {
                 updateManualRows('ingredients', rowId, 'amount', value)
               }
               onAddRow={() => addManualRow('ingredients')}
+              onRemoveRow={(rowId) => removeManualRow('ingredients', rowId)}
             />
           </FormField>
           <FormField label="양념">
@@ -130,6 +138,7 @@ export default function ManualFormScreen() {
                 updateManualRows('seasonings', rowId, 'amount', value)
               }
               onAddRow={() => addManualRow('seasonings')}
+              onRemoveRow={(rowId) => removeManualRow('seasonings', rowId)}
             />
           </FormField>
           <FormField label="조리 순서">

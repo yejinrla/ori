@@ -729,8 +729,25 @@ export const styles = StyleSheet.create({
   manualGridHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 2,
+    gap: 10,
     paddingBottom: 8,
+  },
+  manualGridRowActionSpacer: {
+    width: 28,
+  },
+  manualGridDelete: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#EFE0D4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  manualGridDeleteText: {
+    fontSize: 20,
+    lineHeight: 22,
+    color: '#9A7B6A',
+    marginTop: -2,
   },
   manualGridHeaderText: {
     fontFamily: 'MaruBuri',
