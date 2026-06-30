@@ -242,7 +242,7 @@ export default function App() {
   const renderHome = () => (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.searchCard}>
-        <Text style={styles.sectionTitle}>오늘의 요리</Text>
+        <Text style={styles.sectionTitle}>레시피 찾기</Text>
         <TextInput
           placeholder="음식, 재료, 태그로 검색"
           placeholderTextColor="#8C7A70"
