@@ -37,11 +37,17 @@ type ManualRecipeForm = {
   title: string;
   category: string;
   image: string;
-  ingredients: string;
-  seasonings: string;
+  ingredients: ManualItemRow[];
+  seasonings: ManualItemRow[];
   steps: string;
   memo: string;
   tags: string;
+};
+
+type ManualItemRow = {
+  id: string;
+  name: string;
+  amount: string;
 };
 
 const initialRecipes: Recipe[] = [
@@ -107,8 +113,14 @@ const emptyManualForm: ManualRecipeForm = {
   title: '',
   category: '',
   image: '🍳',
-  ingredients: '',
-  seasonings: '',
+  ingredients: [
+    { id: 'ingredient-1', name: '', amount: '' },
+    { id: 'ingredient-2', name: '', amount: '' },
+  ],
+  seasonings: [
+    { id: 'seasoning-1', name: '', amount: '' },
+    { id: 'seasoning-2', name: '', amount: '' },
+  ],
   steps: '',
   memo: '',
   tags: '',
@@ -201,7 +213,11 @@ export default function App() {
       return;
     }
 
-    const toList = (value: string) =>
+    const toList = (rows: ManualItemRow[]) =>
+      rows
+        .map((row) => [row.name.trim(), row.amount.trim()].filter(Boolean).join(' '))
+        .filter(Boolean);
+    const toStepList = (value: string) =>
       value
         .split('\n')
         .map((item) => item.trim())
@@ -218,7 +234,7 @@ export default function App() {
         .map((item) => (item.startsWith('#') ? item : `#${item}`)),
       ingredients: toList(manualForm.ingredients),
       seasonings: toList(manualForm.seasonings),
-      steps: toList(manualForm.steps),
+      steps: toStepList(manualForm.steps),
       memo: manualForm.memo.trim(),
       image: manualForm.image.trim() || '🍳',
       sourceType: 'manual',
@@ -237,6 +253,28 @@ export default function App() {
         recipe.id === recipeId ? { ...recipe, favorite: !recipe.favorite } : recipe,
       ),
     );
+  };
+
+  const updateManualRows = (
+    field: 'ingredients' | 'seasonings',
+    rowId: string,
+    key: 'name' | 'amount',
+    value: string,
+  ) => {
+    setManualForm((current) => ({
+      ...current,
+      [field]: current[field].map((row) => (row.id === rowId ? { ...row, [key]: value } : row)),
+    }));
+  };
+
+  const addManualRow = (field: 'ingredients' | 'seasonings') => {
+    setManualForm((current) => ({
+      ...current,
+      [field]: [
+        ...current[field],
+        { id: `${field}-${Date.now()}-${current[field].length}`, name: '', amount: '' },
+      ],
+    }));
   };
 
   const renderHome = () => (
@@ -373,23 +411,23 @@ export default function App() {
           />
         </FormField>
         <FormField label="재료">
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            multiline
-            value={manualForm.ingredients}
-            onChangeText={(value) => setManualForm((current) => ({ ...current, ingredients: value }))}
-            placeholder={'한 줄에 하나씩 입력\n돼지고기 500g\n양파 1개'}
-            placeholderTextColor="#8C7A70"
+          <ManualGridEditor
+            rows={manualForm.ingredients}
+            namePlaceholder="예: 돼지고기"
+            amountPlaceholder="예: 500g"
+            onNameChange={(rowId, value) => updateManualRows('ingredients', rowId, 'name', value)}
+            onAmountChange={(rowId, value) => updateManualRows('ingredients', rowId, 'amount', value)}
+            onAddRow={() => addManualRow('ingredients')}
           />
         </FormField>
         <FormField label="양념">
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            multiline
-            value={manualForm.seasonings}
-            onChangeText={(value) => setManualForm((current) => ({ ...current, seasonings: value }))}
-            placeholder={'한 줄에 하나씩 입력\n고추장 2큰술\n간장 1큰술'}
-            placeholderTextColor="#8C7A70"
+          <ManualGridEditor
+            rows={manualForm.seasonings}
+            namePlaceholder="예: 고추장"
+            amountPlaceholder="예: 2큰술"
+            onNameChange={(rowId, value) => updateManualRows('seasonings', rowId, 'name', value)}
+            onAmountChange={(rowId, value) => updateManualRows('seasonings', rowId, 'amount', value)}
+            onAddRow={() => addManualRow('seasonings')}
           />
         </FormField>
         <FormField label="조리 순서">
@@ -658,6 +696,52 @@ function FormField({
     <View style={styles.fieldBlock}>
       <Text style={styles.label}>{label}</Text>
       {children}
+    </View>
+  );
+}
+
+function ManualGridEditor({
+  rows,
+  namePlaceholder,
+  amountPlaceholder,
+  onNameChange,
+  onAmountChange,
+  onAddRow,
+}: {
+  rows: ManualItemRow[];
+  namePlaceholder: string;
+  amountPlaceholder: string;
+  onNameChange: (rowId: string, value: string) => void;
+  onAmountChange: (rowId: string, value: string) => void;
+  onAddRow: () => void;
+}) {
+  return (
+    <View style={styles.manualGridBox}>
+      <View style={styles.manualGridHeader}>
+        <Text style={styles.manualGridHeaderText}>항목</Text>
+        <Text style={styles.manualGridHeaderText}>수량</Text>
+      </View>
+      {rows.map((row) => (
+        <View key={row.id} style={styles.manualGridRow}>
+          <TextInput
+            style={[styles.manualGridInput, styles.manualGridNameInput]}
+            value={row.name}
+            onChangeText={(value) => onNameChange(row.id, value)}
+            placeholder={namePlaceholder}
+            placeholderTextColor="#9A877C"
+          />
+          <TextInput
+            style={[styles.manualGridInput, styles.manualGridAmountInput]}
+            value={row.amount}
+            onChangeText={(value) => onAmountChange(row.id, value)}
+            placeholder={amountPlaceholder}
+            placeholderTextColor="#9A877C"
+          />
+        </View>
+      ))}
+      <Pressable style={styles.manualGridAddButton} onPress={onAddRow}>
+        <Text style={styles.manualGridAddText}>+ 행 추가</Text>
+      </Pressable>
     </View>
   );
 }
@@ -1064,6 +1148,61 @@ const styles = StyleSheet.create({
   },
   fieldBlock: {
     gap: 8,
+  },
+  manualGridBox: {
+    backgroundColor: '#F6EFE7',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 10,
+    gap: 6,
+  },
+  manualGridHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
+    paddingBottom: 8,
+  },
+  manualGridHeaderText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8B7266',
+  },
+  manualGridRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E8DDD3',
+  },
+  manualGridInput: {
+    fontSize: 16,
+    color: '#36231B',
+    paddingVertical: 4,
+  },
+  manualGridNameInput: {
+    flex: 1,
+  },
+  manualGridAmountInput: {
+    width: 112,
+    textAlign: 'right',
+  },
+  manualGridAddButton: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFF9F4',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#E3D4C8',
+  },
+  manualGridAddText: {
+    color: '#7B5C4E',
+    fontSize: 13,
+    fontWeight: '700',
   },
   detailHero: {
     backgroundColor: '#FFF9F4',
