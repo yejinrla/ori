@@ -763,9 +763,8 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   manualGridAmountInput: {
-    width: 96,
-    flexShrink: 0,
-    textAlign: 'right',
+    flex: 1,
+    textAlign: 'left',
   },
   manualGridAddButton: {
     marginTop: 8,
