@@ -629,6 +629,12 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#36231B',
   },
+  optionTitleOnDark: {
+    fontFamily: 'MaruBuri',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
   optionDescription: {
     fontFamily: 'MaruBuri',
     fontSize: 14,

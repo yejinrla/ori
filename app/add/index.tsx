@@ -16,7 +16,7 @@ export default function AddScreen() {
         <Pressable style={styles.primaryOption} onPress={() => router.push('/add/link')}>
           <OptionIcon variant="link" tone="dark" />
           <View style={styles.optionTextBlock}>
-            <Text style={styles.optionTitle}>링크 가져오기</Text>
+            <Text style={styles.optionTitleOnDark}>링크 가져오기</Text>
             <Text style={styles.optionDescriptionOnDark}>
               YouTube, Instagram, 블로그 링크를 AI가 레시피로 정리
             </Text>
