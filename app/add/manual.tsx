@@ -108,7 +108,7 @@ export default function ManualFormScreen() {
   return (
     <Screen back title="직접 작성">
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.screenDescription}>
+        <Text style={[styles.screenDescription, styles.manualScreenDescription]}>
           메모처럼 적어도 번호와 태그가 자동 정리되는 개인 레시피 작성 화면입니다.
         </Text>
         <View style={styles.formCard}>

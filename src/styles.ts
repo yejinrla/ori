@@ -558,6 +558,9 @@ export const styles = StyleSheet.create({
     color: '#947B6E',
     marginBottom: 8,
   },
+  manualScreenDescription: {
+    marginBottom: 0,
+  },
   primaryOption: {
     backgroundColor: '#36231B',
     borderRadius: 24,
