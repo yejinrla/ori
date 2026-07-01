@@ -5,6 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { CalendarTabIcon } from './CalendarTabIcon';
 import { HomeTabIcon } from './HomeTabIcon';
+import { MyPageTabIcon } from './MyPageTabIcon';
 import { RecipeTabIcon } from './RecipeTabIcon';
 import { styles } from '../styles';
 
@@ -12,7 +13,7 @@ const tabItems = [
   { name: 'index', icon: 'home', label: '홈' },
   { name: 'recipes', icon: 'recipe', label: '레시피' },
   { name: 'calendar', icon: 'calendar', label: '캘린더' },
-  { name: 'mypage', icon: '◍', label: '마이페이지' },
+  { name: 'mypage', icon: 'mypage', label: '마이페이지' },
 ] as const;
 
 function NavItem({
@@ -34,6 +35,8 @@ function NavItem({
       <RecipeTabIcon color={iconColor} />
     ) : icon === 'calendar' ? (
       <CalendarTabIcon color={iconColor} />
+    ) : icon === 'mypage' ? (
+      <MyPageTabIcon color={iconColor} />
     ) : (
       <Text style={[styles.navIcon, active && styles.navIconActive]}>{icon}</Text>
     );
