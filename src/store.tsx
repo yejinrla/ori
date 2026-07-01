@@ -5,6 +5,7 @@ import { initialRecipes, type Recipe } from './data';
 type RecipeStore = {
   recipes: Recipe[];
   addRecipe: (recipe: Recipe) => void;
+  updateRecipe: (recipe: Recipe) => void;
   toggleFavorite: (recipeId: string) => void;
   getRecipe: (recipeId: string) => Recipe | undefined;
 };
@@ -18,6 +19,10 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
     () => ({
       recipes,
       addRecipe: (recipe) => setRecipes((current) => [recipe, ...current]),
+      updateRecipe: (updatedRecipe) =>
+        setRecipes((current) =>
+          current.map((recipe) => (recipe.id === updatedRecipe.id ? updatedRecipe : recipe)),
+        ),
       toggleFavorite: (recipeId) =>
         setRecipes((current) =>
           current.map((recipe) =>

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TopBar } from './TopBar';
+import { styles } from '../styles';
 
 export function Screen({
   children,
@@ -14,9 +15,11 @@ export function Screen({
   title?: string;
 }) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={['top']}>
-      <TopBar back={back} title={title} />
-      <View style={{ flex: 1 }}>{children}</View>
-    </SafeAreaView>
+    <View style={styles.screenViewport}>
+      <SafeAreaView style={styles.screenFrame} edges={['top']}>
+        <TopBar back={back} title={title} />
+        <View style={styles.screenBody}>{children}</View>
+      </SafeAreaView>
+    </View>
   );
 }

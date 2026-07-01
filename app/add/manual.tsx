@@ -1,18 +1,51 @@
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { FormField } from '../../src/components/FormField';
 import { ManualGridEditor } from '../../src/components/ManualGridEditor';
 import { Screen } from '../../src/components/Screen';
-import { emptyManualForm, type ManualItemRow, type Recipe } from '../../src/data';
+import { emptyManualForm, splitIngredientText, type ManualItemRow, type Recipe } from '../../src/data';
 import { useRecipes } from '../../src/store';
 import { styles } from '../../src/styles';
 
 export default function ManualFormScreen() {
-  const { addRecipe } = useRecipes();
+  const { editId } = useLocalSearchParams<{ editId?: string }>();
+  const { addRecipe, getRecipe, updateRecipe } = useRecipes();
   const [manualForm, setManualForm] = useState(emptyManualForm);
+  const editingRecipe = editId ? getRecipe(editId) : undefined;
+  const isEditing = Boolean(editingRecipe);
+
+  useEffect(() => {
+    if (!editingRecipe) {
+      setManualForm(emptyManualForm);
+      return;
+    }
+
+    const toRows = (items: string[], field: 'ingredient' | 'seasoning') =>
+      items.length
+        ? items.map((item, index) => {
+            const parsed = splitIngredientText(item);
+            return {
+              id: `${field}-${index}`,
+              name: parsed.name,
+              amount: parsed.amount,
+            };
+          })
+        : [{ id: `${field}-0`, name: '', amount: '' }];
+
+    setManualForm({
+      title: editingRecipe.title,
+      category: editingRecipe.category,
+      photo: editingRecipe.photo ?? null,
+      ingredients: toRows(editingRecipe.ingredients, 'ingredient'),
+      seasonings: toRows(editingRecipe.seasonings, 'seasoning'),
+      steps: editingRecipe.steps.join('\n'),
+      memo: editingRecipe.memo,
+      tags: editingRecipe.tags.join(' '),
+    });
+  }, [editingRecipe]);
 
   const pickPhoto = async () => {
     if (Platform.OS !== 'web') {
@@ -81,7 +114,7 @@ export default function ManualFormScreen() {
         .filter(Boolean);
 
     const recipe: Recipe = {
-      id: Date.now().toString(),
+      id: editingRecipe?.id ?? Date.now().toString(),
       title: manualForm.title.trim(),
       category: manualForm.category.trim() || '기타',
       tags: manualForm.tags
@@ -93,23 +126,32 @@ export default function ManualFormScreen() {
       seasonings: toList(manualForm.seasonings),
       steps: toStepList(manualForm.steps),
       memo: manualForm.memo.trim(),
-      image: '🍳',
+      image: editingRecipe?.image ?? '🍳',
       photo: manualForm.photo ?? undefined,
-      sourceType: 'manual',
-      favorite: false,
-      addedAt: '2026.06.30',
+      sourceType: editingRecipe?.sourceType ?? 'manual',
+      favorite: editingRecipe?.favorite ?? false,
+      addedAt: editingRecipe?.addedAt ?? '2026.06.30',
+      cookTime: editingRecipe?.cookTime,
+      rating: editingRecipe?.rating,
+      sourceUrl: editingRecipe?.sourceUrl,
     };
 
-    addRecipe(recipe);
+    if (isEditing) {
+      updateRecipe(recipe);
+    } else {
+      addRecipe(recipe);
+    }
     setManualForm(emptyManualForm);
     router.replace(`/recipe/${recipe.id}`);
   };
 
   return (
-    <Screen back title="직접 작성">
+    <Screen back title={isEditing ? '레시피 수정' : '직접 작성'}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.screenDescription, styles.manualScreenDescription]}>
-          메모처럼 적어도 번호와 태그가 자동 정리되는 개인 레시피 작성 화면입니다.
+          {isEditing
+            ? '재료, 양념, 조리 순서와 메모를 수정해 나만의 레시피를 업데이트하세요.'
+            : '메모처럼 적어도 번호와 태그가 자동 정리되는 개인 레시피 작성 화면입니다.'}
         </Text>
         <View style={styles.formCard}>
           <Pressable style={styles.photoUploadCard} onPress={pickPhoto}>
@@ -213,7 +255,7 @@ export default function ManualFormScreen() {
             />
           </FormField>
           <Pressable style={styles.primaryButton} onPress={createManualRecipe}>
-            <Text style={styles.primaryButtonText}>레시피 저장</Text>
+            <Text style={styles.primaryButtonText}>{isEditing ? '수정 저장' : '레시피 저장'}</Text>
           </Pressable>
         </View>
       </ScrollView>

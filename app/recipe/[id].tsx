@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Screen } from '../../src/components/Screen';
@@ -106,11 +106,19 @@ export default function RecipeDetailScreen() {
           </>
         ) : null}
 
-        <Pressable style={styles.detailFavoriteButton} onPress={() => toggleFavorite(recipe.id)}>
-          <Text style={styles.detailFavoriteText}>
-            {recipe.favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가'}
-          </Text>
-        </Pressable>
+        <View style={styles.detailActionRow}>
+          <Pressable
+            style={styles.detailEditButton}
+            onPress={() => router.push(`/add/manual?editId=${recipe.id}`)}
+          >
+            <Text style={styles.detailEditText}>수정하기</Text>
+          </Pressable>
+          <Pressable style={styles.detailFavoriteButton} onPress={() => toggleFavorite(recipe.id)}>
+            <Text style={styles.detailFavoriteText}>
+              {recipe.favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가'}
+            </Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </Screen>
   );

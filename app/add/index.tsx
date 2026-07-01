@@ -12,10 +12,15 @@ export default function AddScreen() {
         <Text style={styles.screenDescription}>
           인터넷 링크를 가져오거나 직접 작성해서 나만의 레시피북에 저장하세요.
         </Text>
-        <Pressable style={styles.primaryOption} onPress={() => router.push('/add/link')}>
+        <Pressable disabled style={[styles.primaryOption, styles.primaryOptionDisabled]}>
           <OptionIcon variant="link" tone="dark" />
           <View style={styles.optionTextBlock}>
-            <Text style={styles.optionTitleOnDark}>링크 가져오기</Text>
+            <View style={styles.optionTitleRow}>
+              <Text style={styles.optionTitleOnDark}>링크 가져오기</Text>
+              <View style={styles.optionSoonBadge}>
+                <Text style={styles.optionSoonBadgeText}>준비중</Text>
+              </View>
+            </View>
             <Text style={styles.optionDescriptionOnDark}>
               YouTube, Instagram, 블로그 링크를 AI가 레시피로 정리
             </Text>
