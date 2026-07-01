@@ -32,11 +32,10 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.featuredRail}
         >
-          {recentRecipes.map((recipe, index) => (
+          {recentRecipes.map((recipe) => (
             <FeaturedCard
               key={recipe.id}
               recipe={recipe}
-              emoji={index === 0 ? '🍋' : index === 1 ? '🥩' : '🥗'}
               onPress={() => router.push(`/recipe/${recipe.id}`)}
             />
           ))}
@@ -52,7 +51,6 @@ export default function HomeScreen() {
             <FeaturedCard
               key={recipe.id}
               recipe={recipe}
-              emoji={recipe.image}
               onPress={() => router.push(`/recipe/${recipe.id}`)}
             />
           ))}

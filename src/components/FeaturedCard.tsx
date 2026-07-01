@@ -5,11 +5,9 @@ import { styles } from '../styles';
 
 export function FeaturedCard({
   recipe,
-  emoji,
   onPress,
 }: {
   recipe: Recipe;
-  emoji: string;
   onPress: () => void;
 }) {
   return (
@@ -38,7 +36,7 @@ export function FeaturedCard({
         {recipe.photo ? (
           <Image source={{ uri: recipe.photo }} style={styles.featuredImage} />
         ) : (
-          <Text style={styles.featuredEmoji}>{emoji}</Text>
+          <Text style={styles.featuredEmoji}>{recipe.image}</Text>
         )}
       </View>
     </Pressable>
