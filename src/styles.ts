@@ -694,6 +694,9 @@ export const styles = StyleSheet.create({
     minHeight: 96,
     textAlignVertical: 'top',
   },
+  stepsTextArea: {
+    minHeight: 132,
+  },
   primaryButton: {
     backgroundColor: '#D85C43',
     borderRadius: 16,

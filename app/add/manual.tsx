@@ -185,7 +185,7 @@ export default function ManualFormScreen() {
           </FormField>
           <FormField label="조리 순서">
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, styles.stepsTextArea]}
               multiline
               value={manualForm.steps}
               onChangeText={(value) => setManualForm((current) => ({ ...current, steps: value }))}
