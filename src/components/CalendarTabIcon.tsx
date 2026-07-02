@@ -2,7 +2,7 @@ import Svg, { G, Path, Rect } from 'react-native-svg';
 
 export function CalendarTabIcon({ color }: { color: string }) {
   return (
-    <Svg width={21} height={24} viewBox="0 0 24 28" fill="none">
+    <Svg width={23} height={24} viewBox="0 0 24 28" fill="none" preserveAspectRatio="none">
       <G stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <Rect x={3} y={4.5} width={18} height={21.5} rx={3} />
         <Path d="M3 10.5 H21" />
